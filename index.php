@@ -150,13 +150,20 @@ $tarifsTempo = [
 if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tarifHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
 
-    $sumBase = $sumTempo = $sumHCHP = 0;
+    $sumBase = $sumTempo = $sumTempoCorrected = $sumHCHP = 0;
+		$sumTempoBlue = $sumTempoWhite = $sumTempoRed = 0;
+		$sumTempoBlueCorrected = $sumTempoWhiteCorrected = $sumTempoRedCorrected = 0;
     $nbMonths = 0;
     $prevMonth = null;
     $totalConso = 0;
-
+		$nbTempoBlue = 0;
+		$nbTempoWhite = 0;
+		$nbTempoRed = 0;
+		
+		$excludeDays = $_POST['exclude_days'];
+		
     // Histo Tempo
-    $tempoHistoJson = json_decode(file_get_contents('https://raw.githubusercontent.com/grimmlink/tempo-comparatif/master/tempo.json'),
+    $tempoHistoJson = json_decode(file_get_contents('tempo.json'),
         true);
     foreach ($tempoHistoJson['dates'] as $item) {
         $tempoHisto[$item['date']] = $item['couleur'];
@@ -176,17 +183,19 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
                 $sourceDate = trim(str_replace("﻿", '', $date));
                 $newDate = DateTime::createFromFormat(DATE_ATOM, $sourceDate);
+								
+								if (str_contains($excludeDays, $newDate->format('d/m/Y')) == false) {
+									$month = $newDate->format('n');
+									if (!$prevMonth || $prevMonth !== $month) {
+											$prevMonth = $month;
+											$nbMonths++;
+									}
 
-                $month = $newDate->format('n');
-                if (!$prevMonth || $prevMonth !== $month) {
-                    $prevMonth = $month;
-                    $nbMonths++;
-                }
-
-                $consos[$newDate->format('U')] = [
-                    'date' => $newDate,
-                    'val' => $value,
-                ];
+									$consos[$newDate->format('U')] = [
+											'date' => $newDate,
+											'val' => $value,
+									];
+								}
             }
 
             $line++;
@@ -218,6 +227,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
     $comparatif = [];
     $row = 0;
+		$previousDay = '';
     while ($row < count($consos)) {
         $interval = 30;
         /** @var DateTime $currentDate */
@@ -255,6 +265,22 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
         $tarifTempo = $tarifsTempo[0]['tarifs'][$couleurTempo][$tempoPeriod];
         $priceTempo = $valueKWH * $tarifTempo;
 
+				$isNewDate = $currentDate->format('Ymd') != $previousDay;
+				if ($couleurTempo == 'TEMPO_BLEU') {
+					$sumTempoBlue += $priceTempo;
+					if ($isNewDate)
+						$nbTempoBlue ++;
+				}
+				if ($couleurTempo == 'TEMPO_BLANC') {
+					$sumTempoWhite += $priceTempo;
+					if ($isNewDate)
+						$nbTempoWhite ++;
+				}
+				if ($couleurTempo == 'TEMPO_ROUGE') {
+					$sumTempoRed += $priceTempo;
+					if ($isNewDate)
+						$nbTempoRed ++;
+				}
 
 //        echo $currentDate->format('Y-n-j H:i') . ' / ' . $tempoPeriod . ' / ' . $couleurTempo . ' / ' . $tarifTempo . '<br />';
 
@@ -291,6 +317,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
         $totalConso += $valueKWH * 1000;
 
+				$previousDay = $currentDate->format('Ymd');
         $row++;
     }
 //    exit;
@@ -298,6 +325,22 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
     $totalBase = $sumBase + $aboBase * $nbMonths;
     $totalTempo = $sumTempo + $aboTempo * $nbMonths;
     $totalHCHP = $sumHCHP + $aboHCHP * $nbMonths;
+		
+		$aboTempoCorrected = 0;
+		$totalTempoCorrected = 0;
+		$stdTempoRed = 22.0;
+		$stdTempoWhite = 40.0;
+		$stdTempoBlue = 300.24219;	// average duration of one year is 365.24219
+		if ($nbTempoRed > $stdTempoRed/5 && $nbTempoWhite > $stdTempoWhite/5 && $nbTempoBlue > $stdTempoBlue/5) {	// accept only significant values
+			$stdTempoAllColors = $stdTempoRed + $stdTempoWhite + $stdTempoBlue;
+			$nbTempoAllColors = 0.0 + $nbTempoRed + $nbTempoWhite + $nbTempoBlue;
+			$sumTempoBlueCorrected = $sumTempoBlue * ($stdTempoBlue/$stdTempoAllColors) / ($nbTempoBlue/$nbTempoAllColors);
+			$sumTempoWhiteCorrected = $sumTempoWhite * ($stdTempoWhite/$stdTempoAllColors) / ($nbTempoWhite/$nbTempoAllColors);
+			$sumTempoRedCorrected = $sumTempoRed * ($stdTempoRed/$stdTempoAllColors) / ($nbTempoRed/$nbTempoAllColors);
+			$sumTempoCorrected = $sumTempoBlueCorrected + $sumTempoWhiteCorrected + $sumTempoRedCorrected;
+			$aboTempoCorrected = $aboTempo;
+			$totalTempoCorrected = $sumTempoCorrected + $aboTempo * $nbMonths;
+		}
 
     if (isset($_POST['export']) && $_POST['export'] === 'oui') {
         $fp = fopen('php://memory', 'w');
@@ -351,6 +394,13 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
                     <td>'.number_format($sumTempo, 2).'€</td>
                     <td>'.number_format($totalTempo, 2).'€</td>
                     <td>'.number_format(100 - (100 * $totalTempo / $totalBase), 2).'%</td>
+                </tr>
+                <tr>
+                    <th>TEMPO corrigé</th>
+                    <td>'.number_format($aboTempoCorrected * $nbMonths, 2).'€</td>
+                    <td>'.number_format($sumTempoCorrected, 2).'€</td>
+                    <td>'.number_format($totalTempoCorrected, 2).'€</td>
+                    <td>'.number_format(100 - (100 * $totalTempoCorrected / $totalBase), 2).'%</td>
                 </tr>
                 <tr>
                     <th>HC/HP</th>
@@ -442,6 +492,16 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
                     <p class="small">
                         Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
                     </p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Exclusion</legend>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="exclude_days" class="form-label">Exclure jours (liste JJ/MM/AAAA)</label></br>
+                    <textarea name="exclude_days" id="exclude_days" cols="15" rows="3"></textarea>
                 </div>
             </div>
         </fieldset>
