@@ -2,141 +2,19 @@
 
 $tarifBase = $_POST['tarifBase'] ?? 0.2276;
 $aboBase = $_POST['aboBase'] ?? 12.44;
+$horaireHC1 = $_POST['horaireHC1'] ?? '2200-0600';
+$horaireHC2 = $_POST['horaireHC2'] ?? '';
 $tarifHP = $_POST['tarifHP'] ?? 0.2460;
-$tarifHC1 = $_POST['tarifHC1'] ?? '1400-1600-0.1828';
-$tarifHC2 = $_POST['tarifHC2'] ?? '';
+$tarifHC = $_POST['tarifHC'] ?? 0.1828;
 $aboHCHP = $_POST['aboHCHP'] ?? 12.85;
 $aboTempo = $_POST['aboTempo'] ?? 12.80;
-
-$tarifsTempo = [
-    [
-        'start' => DateTime::createFromFormat('Y-m-d H:i:s', '01-02-2023 00:00:00'),
-        'end' => DateTime::createFromFormat('Y-m-d H:i:s', '01-10-2023 00:00:00'),
-        'tarifs' => [
-            'abo' => [
-                6 => 153.60 / 12,
-                9 => 192 / 12,
-                12 => 231.48 / 12,
-                15 => 267.60 / 12,
-                18 => 303.48 / 12,
-                30 => 457.56 / 12,
-                36 => 531.36 / 12,
-            ],
-            'TEMPO_BLEU' => [
-                'hp' => 0.1369,
-                'hc' => 0.1056,
-            ],
-            'TEMPO_BLANC' => [
-                'hp' => 0.1654,
-                'hc' => 0.1246,
-            ],
-            'TEMPO_ROUGE' => [
-                'hp' => 0.7324,
-                'hc' => 0.1328,
-            ],
-        ],
-    ],
-//    [
-//        'start' => DateTime::createFromFormat('Y-m-d H:i:s', '01-08-2022 00:00:00'),
-//        'end' => DateTime::createFromFormat('Y-m-d H:i:s', '01-02-2023 00:00:00'),
-//        'tarifs' => [
-//            'abo' => [
-//                9 => 187.32 / 12,
-//                12 => 223.20 / 12,
-//                15 => 235.20 / 12,
-//                18 => 263.40 / 12,
-//                24 => 370.44 / 12,
-//            ],
-//            'TEMPO_BLEU' => [
-//                'hp' => 0.1277,
-//                'hc' => 0.0837,
-//            ],
-//            'TEMPO_BLANC' => [
-//                'hp' => 0.1949,
-//                'hc' => 0.1237,
-//            ],
-//            'TEMPO_ROUGE' => [
-//                'hp' => 0.3250,
-//                'hc' => 0.1341,
-//            ],
-//        ],
-//    ],
-//    [
-//        'start' => DateTime::createFromFormat('Y-m-d H:i:s', '01-02-2022 00:00:00'),
-//        'end' => DateTime::createFromFormat('Y-m-d H:i:s', '01-08-2022 00:00:00'),
-//        'tarifs' => [
-//            'abo' => [
-//                9 => 144.48 / 12,
-//                12 => 173.64 / 12,
-//                15 => 199.56 / 12,
-//                18 => 224.40 / 12,
-//                24 => 336.60 / 12,
-//            ],
-//            'TEMPO_BLEU' => [
-//                'hp' => 0.0984,
-//                'hc' => 0.0642,
-//            ],
-//            'TEMPO_BLANC' => [
-//                'hp' => 0.1301,
-//                'hc' => 0.0850,
-//            ],
-//            'TEMPO_ROUGE' => [
-//                'hp' => 0.4495,
-//                'hc' => 0.0942,
-//            ],
-//        ],
-//    ],
-//    [
-//        'start' => DateTime::createFromFormat('Y-m-d H:i:s', '01-08-2021 00:00:00'),
-//        'end' => DateTime::createFromFormat('Y-m-d H:i:s', '01-02-2022 00:00:00'),
-//        'tarifs' => [
-//            'abo' => [
-//                9 => 145.92 / 12,
-//                12 => 174.96 / 12,
-//                15 => 200.88 / 12,
-//                18 => 225.72 / 12,
-//                24 => 337.92 / 12,
-//            ],
-//            'TEMPO_BLEU' => [
-//                'hp' => 0.0924,
-//                'hc' => 0.0701,
-//            ],
-//            'TEMPO_BLANC' => [
-//                'hp' => 0.1153,
-//                'hc' => 0.0852,
-//            ],
-//            'TEMPO_ROUGE' => [
-//                'hp' => 0.4904,
-//                'hc' => 0.0933,
-//            ],
-//        ],
-//    ],
-//    [
-//        'start' => DateTime::createFromFormat('Y-m-d H:i:s', '01-02-2021 00:00:00'),
-//        'end' => DateTime::createFromFormat('Y-m-d H:i:s', '01-08-2021 00:00:00'),
-//        'tarifs' => [
-//            'abo' => [
-//                9 => 130.08 / 12,
-//                12 => 151.92 / 12,
-//                15 => 170.04 / 12,
-//                18 => 186.24 / 12,
-//                24 => 268.44 / 12,
-//            ],
-//            'TEMPO_BLEU' => [
-//                'hp' => 0.0938,
-//                'hc' => 0.0701,
-//            ],
-//            'TEMPO_BLANC' => [
-//                'hp' => 0.1161,
-//                'hc' => 0.0846,
-//            ],
-//            'TEMPO_ROUGE' => [
-//                'hp' => 0.4905,
-//                'hc' => 0.0925,
-//            ],
-//        ],
-//    ],
-];
+$tarifTempoRedHP = $_POST['tarifTempoRedHP'] ?? 0.7324;
+$tarifTempoRedHC = $_POST['tarifTempoRedHC'] ?? 0.1328;
+$tarifTempoWhiteHP = $_POST['tarifTempoWhiteHP'] ?? 0.1654;
+$tarifTempoWhiteHC = $_POST['tarifTempoWhiteHC'] ?? 0.1246;
+$tarifTempoBlueHP = $_POST['tarifTempoBlueHP'] ?? 0.1369;
+$tarifTempoBlueHC = $_POST['tarifTempoBlueHC'] ?? 0.1056;
+$excludeDays = $_POST['excludeDays'] ?? '';
 
 //$tempoHistoYear = 2022;
 //while($tempoHistoYear <= date('Y')) {
@@ -147,10 +25,22 @@ $tarifsTempo = [
 //    $tempoHistoYear++;
 //}
 
-if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tarifHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
+function isHC($periodsHC, $currentHour) {
+	foreach ($periodsHC as $periodHC) {
+			if (
+					($periodHC['start'] < $periodHC['end'] && $currentHour > $periodHC['start'] && $currentHour <= $periodHC['end']) // period in the same day
+					 || ($periodHC['start'] > $periodHC['end'] && ( $currentHour > $periodHC['start'] || $currentHour <= $periodHC['end'] )) // period across 2 days
+			) {
+				  return true;
+			}
+	}	
+	return false;
+}
+
+if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['horaireHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
 
-    $sumBase = $sumTempo = $sumTempoCorrected = $sumHCHP = 0;
+    $sumBase = $sumTempo = $sumTempoCorrected = $sumHC = $sumHP = 0;
 		$sumTempoBlue = $sumTempoWhite = $sumTempoRed = 0;
 		$sumTempoBlueCorrected = $sumTempoWhiteCorrected = $sumTempoRedCorrected = 0;
     $nbMonths = 0;
@@ -159,8 +49,6 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 		$nbTempoBlue = 0;
 		$nbTempoWhite = 0;
 		$nbTempoRed = 0;
-		
-		$excludeDays = $_POST['exclude_days'];
 		
     // Histo Tempo
     $tempoHistoJson = json_decode(file_get_contents('tempo.json'),
@@ -172,33 +60,28 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
     // Prepare conso
     if (($handle = fopen($_FILES['conso_file']['tmp_name'], "r")) !== false) {
         $hasHeader = false;
-        $line = 0;
         while (($data = fgetcsv($handle, 1000, ";")) !== false) {
-            if ($line === 0 && $data[0] == '﻿Identifiant PRM') {
-                $hasHeader = true;
-            }
+					  if (count($data) == 2) {
+								list($date, $value) = $data;
 
-            if (!$hasHeader || $line > 2) {
-                list($date, $value) = $data;
+								$sourceDate = trim(str_replace("﻿", '', $date));
+								if (strlen($sourceDate) > 15 && $sourceDate[0] == '2' && $sourceDate[4] == '-' && $sourceDate[7] == '-' && $sourceDate[10] == 'T') {
+										$newDate = DateTime::createFromFormat(DATE_ATOM, $sourceDate);
+										
+										if (str_contains($excludeDays, $newDate->format('d/m/Y')) == false) {
+											$month = $newDate->format('n');
+											if (!$prevMonth || $prevMonth !== $month) {
+													$prevMonth = $month;
+													$nbMonths++;
+											}
 
-                $sourceDate = trim(str_replace("﻿", '', $date));
-                $newDate = DateTime::createFromFormat(DATE_ATOM, $sourceDate);
-								
-								if (str_contains($excludeDays, $newDate->format('d/m/Y')) == false) {
-									$month = $newDate->format('n');
-									if (!$prevMonth || $prevMonth !== $month) {
-											$prevMonth = $month;
-											$nbMonths++;
-									}
-
-									$consos[$newDate->format('U')] = [
-											'date' => $newDate,
-											'val' => $value,
-									];
+											$consos[$newDate->format('U')] = [
+													'date' => $newDate,
+													'val' => $value,
+											];
+										}
 								}
             }
-
-            $line++;
         }
         fclose($handle);
     }
@@ -210,21 +93,19 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
     // HC
     $periodsHC = [];
-    list($start, $end, $tarif) = explode('-', $tarifHC1);
+    list($start, $end) = explode('-', $horaireHC1);
     $periodsHC[] = [
         'start' => (int)$start,
-        'end' => (int)$end,
-        'tarif' => floatval(str_replace(',', '.', $tarif)),
+        'end' => (int)$end
     ];
-    if ($tarifHC2 !== '') {
-        list($start, $end, $tarif) = explode('-', $tarifHC2);
+    if ($horaireHC2 !== '') {
+        list($start, $end) = explode('-', $horaireHC2);
         $periodsHC[] = [
             'start' => (int)$start,
-            'end' => (int)$end,
-            'tarif' => floatval(str_replace(',', '.', $tarif)),
+            'end' => (int)$end
         ];
     }
-
+		
     $comparatif = [];
     $row = 0;
 		$previousDay = '';
@@ -257,12 +138,22 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
         // Base
         $priceBase = $valueKWH * $tarifBase;
+				
+				// Heure creuse ?
+				$isHC = isHC($periodsHC, $currentHour);
 
         // Tempo
         $tempoDate = (int)$currentDate->format('Hi') > 600 ? (clone $currentDate) : (clone $currentDate)->sub(new DateInterval('P1D'));
-        $tempoPeriod = $currentHour > 2200 || $currentHour <= 600 ? 'hc' : 'hp';
         $couleurTempo = $tempoHisto[$tempoDate->format('Y-n-j')] ?? 'TEMPO_BLEU';
-        $tarifTempo = $tarifsTempo[0]['tarifs'][$couleurTempo][$tempoPeriod];
+				if ($couleurTempo == 'TEMPO_BLEU') {
+					$tarifTempo = $isHC ? $tarifTempoBlueHC : $tarifTempoBlueHP;
+				}
+				if ($couleurTempo == 'TEMPO_BLANC') {
+					$tarifTempo = $isHC ? $tarifTempoWhiteHC : $tarifTempoWhiteHP;
+				}
+				if ($couleurTempo == 'TEMPO_ROUGE') {
+					$tarifTempo = $isHC ? $tarifTempoRedHC : $tarifTempoRedHP;
+				}
         $priceTempo = $valueKWH * $tarifTempo;
 
 				$isNewDate = $currentDate->format('Ymd') != $previousDay;
@@ -282,20 +173,8 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 						$nbTempoRed ++;
 				}
 
-//        echo $currentDate->format('Y-n-j H:i') . ' / ' . $tempoPeriod . ' / ' . $couleurTempo . ' / ' . $tarifTempo . '<br />';
-
         // HC/HP
-        $isHC = false;
-        $tarifHCHP = $tarifHP;
-        foreach ($periodsHC as $periodHC) {
-            if (
-                ($periodHC['start'] < $periodHC['end'] && $currentHour > $periodHC['start'] && $currentHour <= $periodHC['end']) // period in the same day
-                 || ($periodHC['start'] > $periodHC['end'] && ( $currentHour > $periodHC['start'] || $currentHour <= $periodHC['end'] )) // period across 2 days
-            ) {
-                $isHC = true;
-                $tarifHCHP = $periodHC['tarif'];
-            }
-        }
+        $tarifHCHP = $isHC ? $tarifHC : $tarifHP;
         $priceHCHP = $valueKWH * $tarifHCHP;
 
         $comparatif[] = [
@@ -313,7 +192,12 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
         $sumBase += $priceBase;
         $sumTempo += $priceTempo;
-        $sumHCHP += $priceHCHP;
+				if ($isHC) {
+					$sumHC += $priceHCHP;
+				} else {
+					$sumHP += $priceHCHP;
+				}
+        
 
         $totalConso += $valueKWH * 1000;
 
@@ -324,20 +208,24 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
     $totalBase = $sumBase + $aboBase * $nbMonths;
     $totalTempo = $sumTempo + $aboTempo * $nbMonths;
-    $totalHCHP = $sumHCHP + $aboHCHP * $nbMonths;
+    $totalHCHP = $sumHC + $sumHP + $aboHCHP * $nbMonths;
 		
 		$aboTempoCorrected = 0;
 		$totalTempoCorrected = 0;
 		$stdTempoRed = 22.0;
 		$stdTempoWhite = 40.0;
 		$stdTempoBlue = 300.24219;	// average duration of one year is 365.24219
-		if ($nbTempoRed > $stdTempoRed/5 && $nbTempoWhite > $stdTempoWhite/5 && $nbTempoBlue > $stdTempoBlue/5) {	// accept only significant values
+		$isTempoCorrected = ($nbTempoRed > $stdTempoRed/5 && $nbTempoWhite > $stdTempoWhite/5 && $nbTempoBlue > $stdTempoBlue/5);	// accept only significant values
+		if ($isTempoCorrected) {
 			$stdTempoAllColors = $stdTempoRed + $stdTempoWhite + $stdTempoBlue;
 			$nbTempoAllColors = 0.0 + $nbTempoRed + $nbTempoWhite + $nbTempoBlue;
-			$sumTempoBlueCorrected = $sumTempoBlue * ($stdTempoBlue/$stdTempoAllColors) / ($nbTempoBlue/$nbTempoAllColors);
-			$sumTempoWhiteCorrected = $sumTempoWhite * ($stdTempoWhite/$stdTempoAllColors) / ($nbTempoWhite/$nbTempoAllColors);
-			$sumTempoRedCorrected = $sumTempoRed * ($stdTempoRed/$stdTempoAllColors) / ($nbTempoRed/$nbTempoAllColors);
-			$sumTempoCorrected = $sumTempoBlueCorrected + $sumTempoWhiteCorrected + $sumTempoRedCorrected;
+			$nbTempoCorrectedBlue = ($stdTempoBlue/$stdTempoAllColors) * $nbTempoAllColors;
+			$sumTempoCorrectedBlue = $sumTempoBlue * $nbTempoCorrectedBlue / $nbTempoBlue;
+			$nbTempoCorrectedWhite = ($stdTempoWhite/$stdTempoAllColors) * $nbTempoAllColors;
+			$sumTempoCorrectedWhite = $sumTempoWhite * $nbTempoCorrectedWhite / $nbTempoWhite;
+			$nbTempoCorrectedRed = ($stdTempoRed/$stdTempoAllColors) * $nbTempoAllColors;
+			$sumTempoCorrectedRed = $sumTempoRed * $nbTempoCorrectedRed / $nbTempoRed;
+			$sumTempoCorrected = $sumTempoCorrectedBlue + $sumTempoCorrectedWhite + $sumTempoCorrectedRed;
 			$aboTempoCorrected = $aboTempo;
 			$totalTempoCorrected = $sumTempoCorrected + $aboTempo * $nbMonths;
 		}
@@ -368,6 +256,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
         fclose($fp);
         exit;
     } else {
+			  $comment = '';
         $totalTable = '
             <h3>
                 Période du '.$consos[0]['date']->format('d/m/Y').' au '.$consos[count($consos) - 1]['date']->format('d/m/Y').'
@@ -389,28 +278,108 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
                     <td></td>
                 </tr>
                 <tr>
-                    <th>TEMPO</th>
+                    <th>Tempo</th>
                     <td>'.number_format($aboTempo * $nbMonths, 2).'€</td>
                     <td>'.number_format($sumTempo, 2).'€</td>
                     <td>'.number_format($totalTempo, 2).'€</td>
                     <td>'.number_format(100 - (100 * $totalTempo / $totalBase), 2).'%</td>
-                </tr>
+                </tr>';
+				if ($isTempoCorrected) {
+					$totalTable .= '
                 <tr>
-                    <th>TEMPO corrigé</th>
+                    <th>Tempo corrigé (1)</th>
                     <td>'.number_format($aboTempoCorrected * $nbMonths, 2).'€</td>
                     <td>'.number_format($sumTempoCorrected, 2).'€</td>
                     <td>'.number_format($totalTempoCorrected, 2).'€</td>
                     <td>'.number_format(100 - (100 * $totalTempoCorrected / $totalBase), 2).'%</td>
-                </tr>
+                </tr>';
+				}
+				$totalTable .= '
                 <tr>
-                    <th>HC/HP</th>
+                    <th>Heures Creuses</th>
                     <td>'.number_format($aboHCHP * $nbMonths, 2).'€</td>
-                    <td>'.number_format($sumHCHP, 2).'€</td>
+                    <td>'.number_format($sumHC + $sumHP, 2).'€</td>
                     <td>'.number_format($totalHCHP, 2).'€</td>
                     <td>'.number_format(100 - (100 * $totalHCHP / $totalBase), 2).'%</td>
                 </tr>
             </table>
             ';
+				$detailTempoTable = '
+						<hr class="hr hr-blurry" />
+						<h4>
+                Détail de la consommation Tempo
+            </h4>
+						<table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Rouge</th>
+                    <th>Blanc</th>
+                    <th>Bleu</th>
+										<th>Total</th>
+                </tr>
+								<tr>
+                    <th>Tempo - Nombre de jours</th>
+                    <td>'.number_format($nbTempoRed, 0).'</td>
+                    <td>'.number_format($nbTempoWhite, 0).'</td>
+                    <td>'.number_format($nbTempoBlue, 0).'</td>
+                    <td>'.number_format($nbTempoRed + $nbTempoWhite + $nbTempoBlue, 0).'</td>
+                </tr>
+								<tr>
+                    <th>Tempo - Consommation</th>
+                    <td>'.number_format($sumTempoRed, 2).'€</td>
+                    <td>'.number_format($sumTempoWhite, 2).'€</td>
+                    <td>'.number_format($sumTempoBlue, 2).'€</td>
+                    <td>'.number_format($sumTempoRed + $sumTempoWhite + $sumTempoBlue, 2).'€</td>
+                </tr>
+					';
+				if ($isTempoCorrected) {
+					$detailTempoTable .= '
+								<tr>
+                    <th>Tempo corrigé (1) - Nombre de jours</th>
+                    <td>'.number_format($nbTempoCorrectedRed, 0).'</td>
+                    <td>'.number_format($nbTempoCorrectedWhite, 0).'</td>
+                    <td>'.number_format($nbTempoCorrectedBlue, 0).'</td>
+                    <td>'.number_format($nbTempoCorrectedRed + $nbTempoCorrectedWhite + $nbTempoCorrectedBlue, 0).'</td>
+                </tr>
+								<tr>
+                    <th>Tempo corrigé (1) - Consommation</th>
+                    <td>'.number_format($sumTempoCorrectedRed, 2).'€</td>
+                    <td>'.number_format($sumTempoCorrectedWhite, 2).'€</td>
+                    <td>'.number_format($sumTempoCorrectedBlue, 2).'€</td>
+                    <td>'.number_format($sumTempoCorrectedRed + $sumTempoCorrectedWhite + $sumTempoCorrectedBlue, 2).'€</td>
+                </tr>
+					';
+				}
+				$detailTempoTable .= '
+            </table>
+					';
+				
+				$detailHCHPTable = '
+						<hr class="hr hr-blurry" />
+						<h4>
+              Détail de la consommation Heures Creuses
+            </h4>
+						<table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Heures pleines</th>
+                    <th>Heures creuses</th>
+										<th>Total</th>
+                </tr>
+								<tr>
+                    <th>Heures Creuses - Consommation</th>
+                    <td>'.number_format($sumHP, 2).'€</td>
+                    <td>'.number_format($sumHC, 2).'€</td>
+                    <td>'.number_format($sumHP+ $sumHC , 2).'€</td>
+                </tr>
+						</table>
+					';
+				if ($isTempoCorrected) {
+					$comment .= '<footer class="blockquote-footer">
+											(1) - Tempo corrigé recalcule l\'option pour obtenir le nombre de jours annuels contractuels : 22 jours rouges, 33 jours blancs et 300 ou 301 jours bleus
+											</footer>
+					';
+				}
     }
 }
 ?>
@@ -433,7 +402,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
 
     <form action="/" method="POST" enctype="multipart/form-data">
         <fieldset>
-            <legend>BASE</legend>
+            <legend>Option Base</legend>
             <div class="row mb-3">
                 <div class="col">
                     <label for="aboBase" class="form-label">Abonnement mensuel base</label>
@@ -449,59 +418,107 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
         </fieldset>
 
         <fieldset>
-            <legend>HC/HP</legend>
+            <legend>Plages horaires Heures Creuses</legend>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="horaireHC1" class="form-label">Horaire HC 1</label>
+                    <input type="text" class="form-control" name="horaireHC1" id="horaireHC1" value="<?php
+                    echo $horaireHC1; ?>" placeholder="">
+                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>2200-0600</code></p>
+                </div>
+                <div class="col">
+                    <label for="horaireHC2" class="form-label">Horaire HC 2</label>
+                    <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
+                    echo $horaireHC2; ?>" placeholder="">
+                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>1230-1430</code></p>
+                </div>
+            </div>
+        </fieldset>
+				
+        <fieldset>
+            <legend>Option Heures Creuses</legend>
             <div class="row mb-3">
                 <div class="col">
                     <label for="aboHCHP" class="form-label">Abonnement HC/HP</label>
                     <input type="text" class="form-control" name="aboHCHP" id="aboHCHP" value="<?php
-                    echo $aboHCHP; ?>" placeholder="15">
+                    echo $aboHCHP; ?>" placeholder="">
                 </div>
                 <div class="col">
                     <label for="tarifHP" class="form-label">Tarif HP</label>
                     <input type="text" class="form-control" name="tarifHP" id="tarifHP" value="<?php
-                    echo $tarifHP; ?>" placeholder="0,1740;1400-1600-0,1402;0000-0600-0,1402">
+                    echo $tarifHP; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifHC1" class="form-label">Tarif HC 1</label>
-                    <input type="text" class="form-control" name="tarifHC1" id="tarifHC1" value="<?php
-                    echo $tarifHC1; ?>" placeholder="1400-1600-0,1402">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]-tarif</code>.<br/>Exemple :
-                        <code>1400-1600-0.1402</code></p>
-                </div>
-                <div class="col">
-                    <label for="tarifHC2" class="form-label">Tarif HC 2</label>
-                    <input type="text" class="form-control" name="tarifHC2" id="tarifHC2" value="<?php
-                    echo $tarifHC2; ?>" placeholder="0000-0600-0.1402">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]-tarif</code>.<br/>Exemple :
-                        <code>0000-0600-0.1402</code></p>
+                    <label for="tarifHC" class="form-label">Tarif HC</label>
+                    <input type="text" class="form-control" name="tarifHC" id="tarifHC" value="<?php
+                    echo $tarifHC; ?>" placeholder="">
                 </div>
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>Consommation</legend>
+            <legend>Option Tempo</legend>
             <div class="row mb-3">
                 <div class="col">
                     <label for="aboTempo" class="form-label">Abonnement Tempo</label>
                     <input type="text" class="form-control" name="aboTempo" id="aboTempo" value="<?php
                     echo $aboTempo; ?>" placeholder="15">
                 </div>
+            </div>
+            <div class="row mb-3">
                 <div class="col">
-                    <label for="conso_file" class="form-label">Fichier de conso (CSV)</label>
-                    <input type="file" class="form-control" name="conso_file" id="conso_file">
-                    <p class="small">
-                        Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
-                    </p>
+                    <label for="tarifTempoRedHP" class="form-label">Tarif Tempo Rouge HP</label>
+                    <input type="text" class="form-control" name="tarifTempoRedHP" id="tarifTempoRedHP" value="<?php
+                    echo $tarifTempoRedHP; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifTempoWhiteHP" class="form-label">Tarif Tempo Blanc HP</label>
+                    <input type="text" class="form-control" name="tarifTempoWhiteHP" id="tarifTempoWhiteHP" value="<?php
+                    echo $tarifTempoWhiteHP; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifTempoBlueHP" class="form-label">Tarif Tempo Bleu HP</label>
+                    <input type="text" class="form-control" name="tarifTempoBlueHP" id="tarifTempoBlueHP" value="<?php
+                    echo $tarifTempoBlueHP; ?>" placeholder="">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="tarifTempoRedHC" class="form-label">Tarif Tempo Rouge HC</label>
+                    <input type="text" class="form-control" name="tarifTempoRedHC" id="tarifTempoRedHC" value="<?php
+                    echo $tarifTempoRedHC; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifTempoWhiteHC" class="form-label">Tarif Tempo Blanc HC</label>
+                    <input type="text" class="form-control" name="tarifTempoWhiteHC" id="tarifTempoWhiteHC" value="<?php
+                    echo $tarifTempoWhiteHC; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifTempoBlueHC" class="form-label">Tarif Tempo Bleu HC</label>
+                    <input type="text" class="form-control" name="tarifTempoBlueHC" id="tarifTempoBlueHC" value="<?php
+                    echo $tarifTempoBlueHC; ?>" placeholder="">
                 </div>
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>Exclusion</legend>
-            <div class="row mb-3">
+            <legend>Consommation</legend>
+						<div class="row mb-3">
                 <div class="col">
-                    <label for="exclude_days" class="form-label">Exclure jours (liste JJ/MM/AAAA)</label></br>
-                    <textarea name="exclude_days" id="exclude_days" cols="15" rows="3"></textarea>
+                    <label for="conso_file" class="form-label">Fichier de consommation horaire (CSV)</label>
+                    <input type="file" class="form-control" name="conso_file" id="conso_file">
+                    <p class="small">
+                        Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
+                    </p>
+                </div>
+                <div class="col">
+                    <label for="excludeDays" class="form-label">Jours à exclure</label>
+                    <input type="text" class="form-control" name="excludeDays" id="excludeDays" value="<?php
+                    echo $excludeDays; ?>" placeholder="">
+										<p class="small">Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
+                        <code>05/02/2022;06/02/2022;13/02/2022</code></p>
                 </div>
             </div>
         </fieldset>
@@ -520,6 +537,15 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['tari
     <?php
     if (isset($totalTable)) {
         echo $totalTable;
+				if (isset($detailTempoTable)) {
+					echo $detailTempoTable;
+				}
+				if (isset($detailHCHPTable)) {
+					echo $detailHCHPTable;
+				}
+				if (isset($comment)) {
+					echo $comment;
+				}
     } ?>
 
 
