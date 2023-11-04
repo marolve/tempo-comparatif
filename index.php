@@ -398,7 +398,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         crossorigin="anonymous"></script>
 
 <div class="container">
-    <h1>Comparatif de facture Base / HC / Tempo</h1>
+    <h1>Comparatif de facture Base / Heures Creuses / Tempo</h1>
 
     <form action="/" method="POST" enctype="multipart/form-data">
         <fieldset>
@@ -549,7 +549,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     } ?>
 
 
-    <p class="text-end small"><a href="https://github.com/grimmlink/tempo-comparatif">Voir le code sur GitHub</a></p>
+    <p class="text-end small"><a href="https://github.com/marolve/tempo-comparatif">Voir le code sur GitHub</a></p>
 </div>
 
 </body>
