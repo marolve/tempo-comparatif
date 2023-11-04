@@ -37,6 +37,23 @@ function isHC($periodsHC, $currentHour) {
 	return false;
 }
 
+function getPeriodsHC($horHC1, $horHC2) {
+	$periods = [];
+	list($start, $end) = explode('-', $horHC1);
+	$periods[] = [
+			'start' => (int)$start,
+			'end' => (int)$end
+	];
+	if ($horHC2 !== '') {
+			list($start, $end) = explode('-', $horHC2);
+			$periods[] = [
+					'start' => (int)$start,
+					'end' => (int)$end
+			];
+	}
+	return $periods;
+}
+
 if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['horaireHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
 
@@ -96,20 +113,9 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     $firstDay = $consos[0]['date'];
     $lastDay = $consos[count($consos) - 1]['date'];
 
-    // HC
-    $periodsHC = [];
-    list($start, $end) = explode('-', $horaireHC1);
-    $periodsHC[] = [
-        'start' => (int)$start,
-        'end' => (int)$end
-    ];
-    if ($horaireHC2 !== '') {
-        list($start, $end) = explode('-', $horaireHC2);
-        $periodsHC[] = [
-            'start' => (int)$start,
-            'end' => (int)$end
-        ];
-    }
+    // Heures creuses
+    $periodsHC = getPeriodsHC( $horaireHC1, $horaireHC2);
+		$periodsTempoHC = getPeriodsHC( '2200-0600', '');
 		
     $comparatif = [];
     $row = 0;
@@ -146,18 +152,19 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				
 				// Heure creuse ?
 				$isHC = isHC($periodsHC, $currentHour);
+				$isTempoHC = isHC($periodsTempoHC, $currentHour);
 
         // Tempo
         $tempoDate = (int)$currentDate->format('Hi') > 600 ? (clone $currentDate) : (clone $currentDate)->sub(new DateInterval('P1D'));
         $couleurTempo = $tempoHisto[$tempoDate->format('Y-n-j')] ?? 'TEMPO_BLEU';
 				if ($couleurTempo == 'TEMPO_BLEU') {
-					$tarifTempo = $isHC ? $tarifTempoBlueHC : $tarifTempoBlueHP;
+					$tarifTempo = $isTempoHC ? $tarifTempoBlueHC : $tarifTempoBlueHP;
 				}
 				if ($couleurTempo == 'TEMPO_BLANC') {
-					$tarifTempo = $isHC ? $tarifTempoWhiteHC : $tarifTempoWhiteHP;
+					$tarifTempo = $isTempoHC ? $tarifTempoWhiteHC : $tarifTempoWhiteHP;
 				}
 				if ($couleurTempo == 'TEMPO_ROUGE') {
-					$tarifTempo = $isHC ? $tarifTempoRedHC : $tarifTempoRedHP;
+					$tarifTempo = $isTempoHC ? $tarifTempoRedHC : $tarifTempoRedHP;
 				}
         $priceTempo = $valueKWH * $tarifTempo;
 
@@ -177,11 +184,11 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 					if ($isNewDate)
 						$nbTempoRed ++;
 				}
-
+				
         // HC/HP
         $tarifHCHP = $isHC ? $tarifHC : $tarifHP;
         $priceHCHP = $valueKWH * $tarifHCHP;
-
+				
         $comparatif[] = [
             $currentDate->format(DATE_ATOM),
             $valueKWH,
@@ -191,6 +198,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             $tarifTempo,
             $priceTempo,
             $isHC ? 'oui' : 'non',
+						$isTempoHC ? 'oui' : 'non',
             $tarifHCHP,
             $priceHCHP,
         ];
@@ -245,7 +253,8 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             'Couleur Tempo',
             'Tarif kWh Tempo',
             'Total Tempo',
-            'HC?',
+            'HC HC/HP',
+						'HC Tempo',
             'Tarif kWh HC/HP',
             'Total HC/HP',
         ], ';');
@@ -423,26 +432,6 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         </fieldset>
 
         <fieldset>
-            <legend>Plages horaires Heures Creuses</legend>
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="horaireHC1" class="form-label">Horaire HC 1</label>
-                    <input type="text" class="form-control" name="horaireHC1" id="horaireHC1" value="<?php
-                    echo $horaireHC1; ?>" placeholder="">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
-                        <code>2200-0600</code></p>
-                </div>
-                <div class="col">
-                    <label for="horaireHC2" class="form-label">Horaire HC 2</label>
-                    <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
-                    echo $horaireHC2; ?>" placeholder="">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
-                        <code>1230-1430</code></p>
-                </div>
-            </div>
-        </fieldset>
-				
-        <fieldset>
             <legend>Option Heures Creuses</legend>
             <div class="row mb-3">
                 <div class="col">
@@ -459,6 +448,22 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <label for="tarifHC" class="form-label">Tarif HC</label>
                     <input type="text" class="form-control" name="tarifHC" id="tarifHC" value="<?php
                     echo $tarifHC; ?>" placeholder="">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="horaireHC1" class="form-label">Horaire HC 1</label>
+                    <input type="text" class="form-control" name="horaireHC1" id="horaireHC1" value="<?php
+                    echo $horaireHC1; ?>" placeholder="">
+                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>2200-0600</code></p>
+                </div>
+                <div class="col">
+                    <label for="horaireHC2" class="form-label">Horaire HC 2</label>
+                    <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
+                    echo $horaireHC2; ?>" placeholder="">
+                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>1230-1430</code></p>
                 </div>
             </div>
         </fieldset>
