@@ -87,6 +87,11 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     }
     ksort($consos);
     $consos = array_values($consos);
+		
+		if (count($consos) == 0) {
+			echo "Fichier de consommation horaire incorrect.";
+			exit;
+		}
 
     $firstDay = $consos[0]['date'];
     $lastDay = $consos[count($consos) - 1]['date'];
@@ -399,8 +404,8 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 
 <div class="container">
     <h1>Comparatif de facture Base / Heures Creuses / Tempo</h1>
-
-    <form action="/" method="POST" enctype="multipart/form-data">
+		
+    <form id="parametersform" action="/" method="POST" enctype="multipart/form-data">
         <fieldset>
             <legend>Option Base</legend>
             <div class="row mb-3">
@@ -546,6 +551,11 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				if (isset($comment)) {
 					echo $comment;
 				}
+				echo '
+					<script type="text/javascript">
+						document.getElementById("parametersform").style.display = "none";
+					</script>
+				';
     } ?>
 
 
