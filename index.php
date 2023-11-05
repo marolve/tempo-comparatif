@@ -14,6 +14,14 @@ $tarifTempoWhiteHP = $_POST['tarifTempoWhiteHP'] ?? 0.1654;
 $tarifTempoWhiteHC = $_POST['tarifTempoWhiteHC'] ?? 0.1246;
 $tarifTempoBlueHP = $_POST['tarifTempoBlueHP'] ?? 0.1369;
 $tarifTempoBlueHC = $_POST['tarifTempoBlueHC'] ?? 0.1056;
+$aboZenWE = $_POST['aboZenWE'] ?? 12.44;
+$tarifZenWEWeek = $_POST['tarifZenWEWeek'] ?? 0.2525;
+$tarifZenWEEnd = $_POST['tarifZenWEEnd'] ?? 0.1771;
+$aboZenWEHCHP = $_POST['aboZenHCHPWE'] ?? 16.55;
+$tarifZenWEHPWeek = $_POST['tarifZenWEHPWeek'] ?? 0.2683;
+$tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.1881;
+$tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.1881;
+$tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.1881;
 $excludeDays = $_POST['excludeDays'] ?? '';
 
 //$tempoHistoYear = 2022;
@@ -66,12 +74,20 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				'total' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
 			],
 			'tempocorrected' => [
-				'rouge' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
-				'blanc' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
-				'bleu'  => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
-				'total' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
+				'rouge' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+				'blanc' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+				'bleu'  => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+				'total' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ]
 			],
-			'hchp' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
+			'hchp' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+			'zenWE' => [ 
+				'week'    => [ 'cost' => 0.0, 'conso' => 0.0, 'consobyday' => 0.0, 'days' => 0 ],
+				'weekend' => [ 'cost' => 0.0, 'conso' => 0.0, 'consobyday' => 0.0, 'days' => 0 ]
+			],
+			'zenWEHCHP' => [ 
+				'week'    => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+				'weekend' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'days' => 0 ],
+			]
 		];
     $nbMonths = 0;
     $prevMonth = null;
@@ -161,8 +177,10 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         $priceBase = $valueKWH * $tarifBase;
 				
 				// Heure creuse ?
-				$isHC = isHC($periodsHC, $currentHour);
+				$isEnedisHC = isHC($periodsHC, $currentHour);
+				$enedisHCHP = $isEnedisHC ? 'hc' : 'hp';
 				$isTempoHC = isHC($periodsTempoHC, $currentHour);
+				$tempoHCHP = $isTempoHC ? 'hc' : 'hp';
 
         // Tempo
         $tempoDate = (int)$currentDate->format('Hi') > 600 ? (clone $currentDate) : (clone $currentDate)->sub(new DateInterval('P1D'));
@@ -181,18 +199,39 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				}
         $priceTempo = $valueKWH * $tarifTempo;
 				$isNewDate = $currentDate->format('Ymd') != $previousDay;
-				$stats['tempo'][$couleurTempo]['conso'.($isTempoHC ? 'hc' : 'hp')] += $valueKWH;
-				$stats['tempo'][$couleurTempo]['cost'.($isTempoHC ? 'hc' : 'hp')] += $priceTempo;
-				$stats['tempo']['total']['conso'.($isTempoHC ? 'hc' : 'hp')] += $valueKWH;
-				$stats['tempo']['total']['cost'.($isTempoHC ? 'hc' : 'hp')] += $priceTempo;
+				$stats['tempo'][$couleurTempo]['conso'.$tempoHCHP] += $valueKWH;
+				$stats['tempo'][$couleurTempo]['cost'.$tempoHCHP] += $priceTempo;
+				$stats['tempo']['total']['conso'.$tempoHCHP] += $valueKWH;
+				$stats['tempo']['total']['cost'.$tempoHCHP] += $priceTempo;
 				if ($isNewDate) {
 					$stats['tempo'][$couleurTempo]['days'] ++;
 					$stats['tempo']['total']['days'] ++;
 				}
 
         // HC/HP
-        $tarifHCHP = $isHC ? $tarifHC : $tarifHP;
+        $tarifHCHP = $isEnedisHC ? $tarifHC : $tarifHP;
         $priceHCHP = $valueKWH * $tarifHCHP;
+				
+				// ZenWE
+				$dayOfWeek = date('w', $currentDate->getTimestamp());
+				$isWeek = ($dayOfWeek > 0 && $dayOfWeek < 6);
+				$weekOrEnd = $isWeek ? 'week' : 'weekend';
+				$tarifZenWE = $isWeek ? $tarifZenWEWeek : $tarifZenWEEnd;
+				$priceZenWE = $valueKWH * $tarifZenWE;
+				$stats['zenWE'][$weekOrEnd]['conso'] += $valueKWH;
+				$stats['zenWE'][$weekOrEnd]['cost'] += $priceZenWE;
+				$tarifZenWEHCHP = 0.0;
+				if ($isEnedisHC) 
+					$tarifZenWEHCHP = $isWeek ? $tarifZenWEHCWeek : $tarifZenWEHCEnd;
+				else
+					$tarifZenWEHCHP = $isWeek ? $tarifZenWEHPWeek : $tarifZenWEHPEnd;
+				$priceZenWEHCHP = $valueKWH * $tarifZenWEHCHP;
+				$stats['zenWEHCHP'][$weekOrEnd]['conso'.$enedisHCHP] += $valueKWH;
+				$stats['zenWEHCHP'][$weekOrEnd]['cost'.$enedisHCHP] += $priceZenWEHCHP;
+				if ($isNewDate) {
+					$stats['zenWE'][$weekOrEnd]['days'] ++;
+					$stats['zenWEHCHP'][$weekOrEnd]['days'] ++;
+				}
 				
         $comparatif[] = [
             $currentDate->format(DATE_ATOM),
@@ -202,14 +241,18 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             $couleurTempo,
             $tarifTempo,
             $priceTempo,
-            $isHC ? 'oui' : 'non',
+            $isEnedisHC ? 'oui' : 'non',
 						$isTempoHC ? 'oui' : 'non',
             $tarifHCHP,
             $priceHCHP,
+						$tarifZenWE,
+						$priceZenWE,
+						$tarifZenWEHCHP,
+						$priceZenWEHCHP,
         ];
 
         $sumBase += $priceBase;
-				$stats['hchp']['cost'.($isHC ? 'hc' : 'hp')] += $priceHCHP;
+				$stats['hchp']['cost'.$enedisHCHP] += $priceHCHP;
 
         $totalConso += $valueKWH * 1000;
 
@@ -221,6 +264,9 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     $totalBase = $sumBase + $aboBase * $nbMonths;
     $totalTempo = $stats['tempo']['total']['costhp'] + $stats['tempo']['total']['costhc'] + $aboTempo * $nbMonths;
     $totalHCHP = $stats['hchp']['costhc'] + $stats['hchp']['costhp'] + $aboHCHP * $nbMonths;
+		$totalZenWE = $stats['zenWE']['week']['cost'] + $stats['zenWE']['weekend']['cost'] + $aboZenWE * $nbMonths;
+		$consoZenWEHCHP = $stats['zenWEHCHP']['week']['costhp'] + $stats['zenWEHCHP']['week']['costhc'] + $stats['zenWEHCHP']['weekend']['costhp'] + $stats['zenWEHCHP']['weekend']['costhc'];
+		$totalZenWEHCHP = $consoZenWEHCHP + $aboZenWEHCHP * $nbMonths;
 		$stats['tempo']['rouge']['consobydayhp'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohp'] / $stats['tempo']['rouge']['days'];
 		$stats['tempo']['rouge']['consobydayhc'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohc'] / $stats['tempo']['rouge']['days'];
 		$stats['tempo']['blanc']['consobydayhp'] = $stats['tempo']['blanc']['days'] == 0 ? 0.0 : $stats['tempo']['blanc']['consohp'] / $stats['tempo']['blanc']['days'];
@@ -285,10 +331,14 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             'Couleur Tempo',
             'Tarif kWh Tempo',
             'Total Tempo',
-            'HC HC/HP',
+            'HC Enedis',
 						'HC Tempo',
             'Tarif kWh HC/HP',
             'Total HC/HP',
+						'Tarif kWh Zen Week-End',
+            'Total Zen Week-End',
+						'Tarif kWh Zen Week-End HC/HP',
+            'Total Zen Week-End HC/HP',
         ], ';');
 
         foreach ($comparatif as $fields) {
@@ -347,6 +397,20 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <td>'.number_format($stats['hchp']['costhc'] + $stats['hchp']['costhp'], 2).' €</td>
                     <td>'.number_format($totalHCHP, 2).' €</td>
                     <td>'.number_format(100 - (100 * $totalHCHP / $totalBase), 2).'%</td>
+                </tr>
+								<tr>
+                    <th>Zen Week-End</th>
+                    <td>'.number_format($aboZenWE * $nbMonths, 2).' €</td>
+                    <td>'.number_format($stats['zenWE']['week']['cost'] + $stats['zenWE']['weekend']['cost'], 2).' €</td>
+                    <td>'.number_format($totalZenWE, 2).' €</td>
+                    <td>'.number_format(100 - (100 * $totalZenWE / $totalBase), 2).'%</td>
+                </tr>
+								<tr>
+                    <th>Zen Week-End Heures Creuses</th>
+                    <td>'.number_format($aboZenWEHCHP * $nbMonths, 2).' €</td>
+                    <td>'.number_format($consoZenWEHCHP, 2).' €</td>
+                    <td>'.number_format($totalZenWEHCHP, 2).' €</td>
+                    <td>'.number_format(100 - (100 * $totalZenWEHCHP / $totalBase), 2).'%</td>
                 </tr>
             </table>
             ';
@@ -466,6 +530,61 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                 </tr>
 						</table>
 					';
+					
+				$detailZenWETable = '
+						<hr class="hr hr-blurry" />
+						<h4>
+              Détail de la consommation Zen Week-End
+            </h4>
+						<table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Semaine </th>
+										<th>Week-End</th>
+										<th>Total</th>
+                </tr>
+								<tr>
+                    <th>Zen Week-End - Coût</th>
+                    <td>'.number_format($stats['zenWE']['week']['cost'], 2).' €</td>
+										<td>'.number_format($stats['zenWE']['weekend']['cost'], 2).' €</td>
+                    <td>'.number_format($stats['zenWE']['week']['cost'] + $stats['zenWE']['weekend']['cost'], 2).' €</td>
+                </tr>
+						</table>
+					';
+					
+				$detailZenWEHCHPTable = '
+						<hr class="hr hr-blurry" />
+						<h4>
+              Détail de la consommation Zen Week-End Heures Creuses
+            </h4>
+						<table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Semaine</th>
+										<th>Week-End</th>
+										<th>Total</th>
+                </tr>
+								<tr>
+                    <th>Zen Week-End HP - Coût</th>
+                    <td>'.number_format($stats['zenWEHCHP']['week']['costhp'], 2).' €</td>
+										<td>'.number_format($stats['zenWEHCHP']['weekend']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['zenWEHCHP']['week']['costhp'] + $stats['zenWEHCHP']['weekend']['costhp'], 2).' €</td>
+                </tr>
+								<tr>
+                    <th>Zen Week-End HC - Coût</th>
+										<td>'.number_format($stats['zenWEHCHP']['week']['costhc'], 2).' €</td>
+										<td>'.number_format($stats['zenWEHCHP']['weekend']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['zenWEHCHP']['week']['costhc'] + $stats['zenWEHCHP']['weekend']['costhc'], 2).' €</td>
+                </tr>
+								<tr>
+                    <th>Zen Week-End HP + HC - Coût</th>
+                    <td>'.number_format($stats['zenWEHCHP']['week']['costhp'] + $stats['zenWEHCHP']['week']['costhc'], 2).' €</td>
+										<td>'.number_format($stats['zenWEHCHP']['weekend']['costhp'] + $stats['zenWEHCHP']['weekend']['costhc'], 2).' €</td>
+                    <td>'.number_format($consoZenWEHCHP, 2).' €</td>
+                </tr>
+						</table>
+					';
+				
 				if ($isTempoCorrected) {
 					$comment .= '<footer class="blockquote-footer">
 											(1) - Tempo corrigé recalcule l\'option pour obtenir le nombre de jours annuels contractuels : 22 jours rouges, 33 jours blancs et 300 ou 301 jours bleus
@@ -490,7 +609,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         crossorigin="anonymous"></script>
 
 <div class="container">
-    <h2>Comparatif de facture Base / Heures Creuses / Tempo</h2>
+    <h2>Comparatif Electricité Base - Heures Creuses - Tempo - Zen Week End</h2>
 		
     <form id="parametersform" action="/" method="POST" enctype="multipart/form-data">
 		
@@ -611,6 +730,59 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                 </div>
             </div>
         </fieldset>
+
+        <fieldset>
+            <legend>Option Zen Week-End</legend>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="aboZenWE" class="form-label">Abonnement mensuel Zen Week-End (€ TTC)</label>
+                    <input type="text" class="form-control" name="aboZenWE" id="aboZenWE" value="<?php
+                    echo $aboZenWE; ?>" placeholder="15">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="tarifZenWEWeek" class="form-label">Tarif Zen WE Semaine (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEWeek" id="tarifZenWEWeek" value="<?php
+                    echo $tarifZenWEWeek; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifZenWEEnd" class="form-label">Tarif Zen WE Week-End (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEEnd" id="tarifZenWEEnd" value="<?php
+                    echo $tarifZenWEEnd; ?>" placeholder="">
+                </div>
+            </div>
+            <legend>Option Zen Week-End Heures Creuses</legend>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="aboZenWEHCHP" class="form-label">Abonnement mensuel Zen Week-End Heures Creuses (€ TTC)</label>
+                    <input type="text" class="form-control" name="aboZenWEHCHP" id="aboZenWEHCHP" value="<?php
+                    echo $aboZenWEHCHP; ?>" placeholder="15">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="tarifZenWEHPWeek" class="form-label">Tarif Zen WE HP Semaine (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEHPWeek" id="tarifZenWEHPWeek" value="<?php
+                    echo $tarifZenWEHPWeek; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifZenWEHCWeek" class="form-label">Tarif Zen WE HC Semaine (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEHCWeek" id="tarifZenWEHCWeek" value="<?php
+                    echo $tarifZenWEHCWeek; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifZenWEHPEnd" class="form-label">Tarif Zen WE HP Week-End (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEHPEnd" id="tarifZenWEHPEnd" value="<?php
+                    echo $tarifZenWEHPEnd; ?>" placeholder="">
+                </div>
+                <div class="col">
+                    <label for="tarifZenWEHCEnd" class="form-label">Tarif Zen WE HC Week-End (€ TTC)</label>
+                    <input type="text" class="form-control" name="tarifZenWEHCEnd" id="tarifZenWEHCEnd" value="<?php
+                    echo $tarifZenWEHCEnd; ?>" placeholder="">
+                </div>
+            </div>
+        </fieldset>
 				
 				<hr class="hr hr-blurry" />
 
@@ -633,6 +805,12 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				}
 				if (isset($detailHCHPTable)) {
 					echo $detailHCHPTable;
+				}
+				if (isset($detailZenWETable)) {
+					echo $detailZenWETable;
+				}
+				if (isset($detailZenWEHCHPTable)) {
+					echo $detailZenWEHCHPTable;
 				}
 				if (isset($comment)) {
 					echo $comment;
