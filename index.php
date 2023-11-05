@@ -226,7 +226,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 		$aboTempoCorrected = 0;
 		$totalTempoCorrected = 0;
 		$stdTempoRed = 22.0;
-		$stdTempoWhite = 40.0;
+		$stdTempoWhite = 43.0;
 		$stdTempoBlue = 300.24219;	// average duration of one year is 365.24219
 		$isTempoCorrected = ($nbTempoRed > $stdTempoRed/5 && $nbTempoWhite > $stdTempoWhite/5 && $nbTempoBlue > $stdTempoBlue/5);	// accept only significant values
 		if ($isTempoCorrected) {
