@@ -57,15 +57,25 @@ function getPeriodsHC($horHC1, $horHC2) {
 if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['horaireHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
 
-    $sumBase = $sumTempo = $sumTempoCorrected = $sumHC = $sumHP = 0;
-		$sumTempoBlue = $sumTempoWhite = $sumTempoRed = 0;
-		$sumTempoBlueCorrected = $sumTempoWhiteCorrected = $sumTempoRedCorrected = 0;
+    $sumBase = 0;
+		$stats = [
+			'tempo' => [
+				'rouge' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'blanc' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'bleu'  => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'total' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
+			],
+			'tempocorrected' => [
+				'rouge' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'blanc' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'bleu'  => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ],
+				'total' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
+			],
+			'hchp' => [ 'costhp' => 0.0, 'costhc' => 0.0, 'consohp' => 0.0, 'consohc' => 0.0, 'consobydayhp' => 0.0, 'consobydayhc' => 0.0, 'days' => 0 ]
+		];
     $nbMonths = 0;
     $prevMonth = null;
     $totalConso = 0;
-		$nbTempoBlue = 0;
-		$nbTempoWhite = 0;
-		$nbTempoRed = 0;
 		
     // Histo Tempo
     $tempoHistoJson = json_decode(file_get_contents('tempo.json'),
@@ -158,33 +168,28 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         $tempoDate = (int)$currentDate->format('Hi') > 600 ? (clone $currentDate) : (clone $currentDate)->sub(new DateInterval('P1D'));
         $couleurTempo = $tempoHisto[$tempoDate->format('Y-n-j')] ?? 'TEMPO_BLEU';
 				if ($couleurTempo == 'TEMPO_BLEU') {
+					$couleurTempo = 'bleu';
 					$tarifTempo = $isTempoHC ? $tarifTempoBlueHC : $tarifTempoBlueHP;
 				}
 				if ($couleurTempo == 'TEMPO_BLANC') {
+					$couleurTempo = 'blanc';
 					$tarifTempo = $isTempoHC ? $tarifTempoWhiteHC : $tarifTempoWhiteHP;
 				}
 				if ($couleurTempo == 'TEMPO_ROUGE') {
+					$couleurTempo = 'rouge';
 					$tarifTempo = $isTempoHC ? $tarifTempoRedHC : $tarifTempoRedHP;
 				}
         $priceTempo = $valueKWH * $tarifTempo;
-
 				$isNewDate = $currentDate->format('Ymd') != $previousDay;
-				if ($couleurTempo == 'TEMPO_BLEU') {
-					$sumTempoBlue += $priceTempo;
-					if ($isNewDate)
-						$nbTempoBlue ++;
+				$stats['tempo'][$couleurTempo]['conso'.($isTempoHC ? 'hc' : 'hp')] += $valueKWH;
+				$stats['tempo'][$couleurTempo]['cost'.($isTempoHC ? 'hc' : 'hp')] += $priceTempo;
+				$stats['tempo']['total']['conso'.($isTempoHC ? 'hc' : 'hp')] += $valueKWH;
+				$stats['tempo']['total']['cost'.($isTempoHC ? 'hc' : 'hp')] += $priceTempo;
+				if ($isNewDate) {
+					$stats['tempo'][$couleurTempo]['days'] ++;
+					$stats['tempo']['total']['days'] ++;
 				}
-				if ($couleurTempo == 'TEMPO_BLANC') {
-					$sumTempoWhite += $priceTempo;
-					if ($isNewDate)
-						$nbTempoWhite ++;
-				}
-				if ($couleurTempo == 'TEMPO_ROUGE') {
-					$sumTempoRed += $priceTempo;
-					if ($isNewDate)
-						$nbTempoRed ++;
-				}
-				
+
         // HC/HP
         $tarifHCHP = $isHC ? $tarifHC : $tarifHP;
         $priceHCHP = $valueKWH * $tarifHCHP;
@@ -204,13 +209,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         ];
 
         $sumBase += $priceBase;
-        $sumTempo += $priceTempo;
-				if ($isHC) {
-					$sumHC += $priceHCHP;
-				} else {
-					$sumHP += $priceHCHP;
-				}
-        
+				$stats['hchp']['cost'.($isHC ? 'hc' : 'hp')] += $priceHCHP;
 
         $totalConso += $valueKWH * 1000;
 
@@ -220,27 +219,60 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 //    exit;
 
     $totalBase = $sumBase + $aboBase * $nbMonths;
-    $totalTempo = $sumTempo + $aboTempo * $nbMonths;
-    $totalHCHP = $sumHC + $sumHP + $aboHCHP * $nbMonths;
+    $totalTempo = $stats['tempo']['total']['costhp'] + $stats['tempo']['total']['costhc'] + $aboTempo * $nbMonths;
+    $totalHCHP = $stats['hchp']['costhc'] + $stats['hchp']['costhp'] + $aboHCHP * $nbMonths;
+		$stats['tempo']['rouge']['consobydayhp'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohp'] / $stats['tempo']['rouge']['days'];
+		$stats['tempo']['rouge']['consobydayhc'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohc'] / $stats['tempo']['rouge']['days'];
+		$stats['tempo']['blanc']['consobydayhp'] = $stats['tempo']['blanc']['days'] == 0 ? 0.0 : $stats['tempo']['blanc']['consohp'] / $stats['tempo']['blanc']['days'];
+		$stats['tempo']['blanc']['consobydayhc'] = $stats['tempo']['blanc']['days'] == 0 ? 0.0 : $stats['tempo']['blanc']['consohc'] / $stats['tempo']['blanc']['days'];
+		$stats['tempo']['bleu']['consobydayhp'] = $stats['tempo']['bleu']['days'] == 0 ? 0.0 : $stats['tempo']['bleu']['consohp'] / $stats['tempo']['bleu']['days'];
+		$stats['tempo']['bleu']['consobydayhc'] = $stats['tempo']['bleu']['days'] == 0 ? 0.0 : $stats['tempo']['bleu']['consohc'] / $stats['tempo']['bleu']['days'];
+		$stats['tempo']['total']['consobydayhp'] = $stats['tempo']['total']['days'] == 0 ? 0.0 : $stats['tempo']['total']['consohp'] / $stats['tempo']['total']['days'];
+		$stats['tempo']['total']['consobydayhc'] = $stats['tempo']['total']['days'] == 0 ? 0.0 : $stats['tempo']['total']['consohc'] / $stats['tempo']['total']['days'];
 		
 		$aboTempoCorrected = 0;
 		$totalTempoCorrected = 0;
 		$stdTempoRed = 22.0;
 		$stdTempoWhite = 43.0;
 		$stdTempoBlue = 300.24219;	// average duration of one year is 365.24219
-		$isTempoCorrected = ($nbTempoRed > $stdTempoRed/5 && $nbTempoWhite > $stdTempoWhite/5 && $nbTempoBlue > $stdTempoBlue/5);	// accept only significant values
+		$isTempoCorrected = ($stats['tempo']['rouge']['days'] > $stdTempoRed/5 
+											&& $stats['tempo']['blanc']['days'] > $stdTempoWhite/5 
+											&& $stats['tempo']['bleu']['days'] > $stdTempoBlue/5);	// accept only significant values
 		if ($isTempoCorrected) {
-			$stdTempoAllColors = $stdTempoRed + $stdTempoWhite + $stdTempoBlue;
-			$nbTempoAllColors = 0.0 + $nbTempoRed + $nbTempoWhite + $nbTempoBlue;
-			$nbTempoCorrectedBlue = ($stdTempoBlue/$stdTempoAllColors) * $nbTempoAllColors;
-			$sumTempoCorrectedBlue = $sumTempoBlue * $nbTempoCorrectedBlue / $nbTempoBlue;
-			$nbTempoCorrectedWhite = ($stdTempoWhite/$stdTempoAllColors) * $nbTempoAllColors;
-			$sumTempoCorrectedWhite = $sumTempoWhite * $nbTempoCorrectedWhite / $nbTempoWhite;
-			$nbTempoCorrectedRed = ($stdTempoRed/$stdTempoAllColors) * $nbTempoAllColors;
-			$sumTempoCorrectedRed = $sumTempoRed * $nbTempoCorrectedRed / $nbTempoRed;
-			$sumTempoCorrected = $sumTempoCorrectedBlue + $sumTempoCorrectedWhite + $sumTempoCorrectedRed;
+      $stdTempoAllColors = $stdTempoRed + $stdTempoWhite + $stdTempoBlue;			
+			$nbTempoAllColors = 0.0 + $stats['tempo']['rouge']['days'] + $stats['tempo']['blanc']['days'] + $stats['tempo']['bleu']['days'];
+			$stats['tempocorrected']['rouge']['days'] = ($stdTempoRed/$stdTempoAllColors) * $nbTempoAllColors;
+			$stats['tempocorrected']['rouge']['costhp'] = $stats['tempo']['rouge']['costhp'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
+			$stats['tempocorrected']['rouge']['costhc'] = $stats['tempo']['rouge']['costhc'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
+			$stats['tempocorrected']['rouge']['consohp'] = $stats['tempo']['rouge']['consohp'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
+			$stats['tempocorrected']['rouge']['consohc'] = $stats['tempo']['rouge']['consohc'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
+			$stats['tempocorrected']['blanc']['days'] = ($stdTempoWhite/$stdTempoAllColors) * $nbTempoAllColors;
+			$stats['tempocorrected']['blanc']['costhp'] = $stats['tempo']['blanc']['costhp'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
+			$stats['tempocorrected']['blanc']['costhc'] = $stats['tempo']['blanc']['costhc'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
+			$stats['tempocorrected']['blanc']['consohp'] = $stats['tempo']['blanc']['consohp'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
+			$stats['tempocorrected']['blanc']['consohc'] = $stats['tempo']['blanc']['consohc'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
+			$stats['tempocorrected']['bleu']['days'] = ($stdTempoBlue/$stdTempoAllColors) * $nbTempoAllColors;
+			$stats['tempocorrected']['bleu']['costhp'] = $stats['tempo']['bleu']['costhp'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
+			$stats['tempocorrected']['bleu']['costhc'] = $stats['tempo']['bleu']['costhc'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
+			$stats['tempocorrected']['bleu']['consohp'] = $stats['tempo']['bleu']['consohp'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
+			$stats['tempocorrected']['bleu']['consohc'] = $stats['tempo']['bleu']['consohc'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
+			$stats['tempocorrected']['total']['days'] = $stats['tempocorrected']['rouge']['days'] 
+																								+ $stats['tempocorrected']['blanc']['days']
+																								+ $stats['tempocorrected']['bleu']['days'];
+			$stats['tempocorrected']['total']['costhp'] = $stats['tempocorrected']['rouge']['costhp']
+																									+ $stats['tempocorrected']['blanc']['costhp']
+																									+ $stats['tempocorrected']['bleu']['costhp'];
+			$stats['tempocorrected']['total']['costhc'] = $stats['tempocorrected']['rouge']['costhc'] 
+																									+ $stats['tempocorrected']['blanc']['costhc'] 
+																									+ $stats['tempocorrected']['bleu']['costhc'];
+			$stats['tempocorrected']['total']['consohp'] = $stats['tempocorrected']['rouge']['consohp']
+																									+ $stats['tempocorrected']['blanc']['consohp']
+																									+ $stats['tempocorrected']['bleu']['consohp'];
+			$stats['tempocorrected']['total']['consohc'] = $stats['tempocorrected']['rouge']['consohc'] 
+																									+ $stats['tempocorrected']['blanc']['consohc'] 
+																									+ $stats['tempocorrected']['bleu']['consohc'];
 			$aboTempoCorrected = $aboTempo;
-			$totalTempoCorrected = $sumTempoCorrected + $aboTempo * $nbMonths;
+			$totalTempoCorrected = $stats['tempocorrected']['total']['costhp'] + $stats['tempocorrected']['total']['costhc'] + $aboTempo * $nbMonths;
 		}
 
     if (isset($_POST['export']) && $_POST['export'] === 'oui') {
@@ -286,34 +318,34 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                 </tr>
                 <tr>
                     <th>Base</th>
-                    <td>'.number_format($aboBase * $nbMonths, 2).'€</td>
-                    <td>'.number_format($sumBase, 2).'€</td>
-                    <td>'.number_format($totalBase, 2).'€</td>
+                    <td>'.number_format($aboBase * $nbMonths, 2).' €</td>
+                    <td>'.number_format($sumBase, 2).' €</td>
+                    <td>'.number_format($totalBase, 2).' €</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Tempo</th>
-                    <td>'.number_format($aboTempo * $nbMonths, 2).'€</td>
-                    <td>'.number_format($sumTempo, 2).'€</td>
-                    <td>'.number_format($totalTempo, 2).'€</td>
+                    <td>'.number_format($aboTempo * $nbMonths, 2).' €</td>
+                    <td>'.number_format($stats['tempo']['total']['costhp'] + $stats['tempo']['total']['costhc'], 2).' €</td>
+                    <td>'.number_format($totalTempo, 2).' €</td>
                     <td>'.number_format(100 - (100 * $totalTempo / $totalBase), 2).'%</td>
                 </tr>';
 				if ($isTempoCorrected) {
 					$totalTable .= '
                 <tr>
                     <th>Tempo corrigé (1)</th>
-                    <td>'.number_format($aboTempoCorrected * $nbMonths, 2).'€</td>
-                    <td>'.number_format($sumTempoCorrected, 2).'€</td>
-                    <td>'.number_format($totalTempoCorrected, 2).'€</td>
+                    <td>'.number_format($aboTempoCorrected * $nbMonths, 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['total']['costhp'] + $stats['tempocorrected']['total']['costhc'], 2).' €</td>
+                    <td>'.number_format($totalTempoCorrected, 2).' €</td>
                     <td>'.number_format(100 - (100 * $totalTempoCorrected / $totalBase), 2).'%</td>
                 </tr>';
 				}
 				$totalTable .= '
                 <tr>
                     <th>Heures Creuses</th>
-                    <td>'.number_format($aboHCHP * $nbMonths, 2).'€</td>
-                    <td>'.number_format($sumHC + $sumHP, 2).'€</td>
-                    <td>'.number_format($totalHCHP, 2).'€</td>
+                    <td>'.number_format($aboHCHP * $nbMonths, 2).' €</td>
+                    <td>'.number_format($stats['hchp']['costhc'] + $stats['hchp']['costhp'], 2).' €</td>
+                    <td>'.number_format($totalHCHP, 2).' €</td>
                     <td>'.number_format(100 - (100 * $totalHCHP / $totalBase), 2).'%</td>
                 </tr>
             </table>
@@ -333,40 +365,86 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                 </tr>
 								<tr>
                     <th>Tempo - Nombre de jours</th>
-                    <td>'.number_format($nbTempoRed, 0).'</td>
-                    <td>'.number_format($nbTempoWhite, 0).'</td>
-                    <td>'.number_format($nbTempoBlue, 0).'</td>
-                    <td>'.number_format($nbTempoRed + $nbTempoWhite + $nbTempoBlue, 0).'</td>
+                    <td>'.number_format($stats['tempo']['rouge']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempo']['blanc']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempo']['bleu']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempo']['total']['days'], 0).'</td>
                 </tr>
 								<tr>
-                    <th>Tempo - Consommation</th>
-                    <td>'.number_format($sumTempoRed, 2).'€</td>
-                    <td>'.number_format($sumTempoWhite, 2).'€</td>
-                    <td>'.number_format($sumTempoBlue, 2).'€</td>
-                    <td>'.number_format($sumTempoRed + $sumTempoWhite + $sumTempoBlue, 2).'€</td>
+                    <th>Tempo - Consommation journalière (kWh/jour)</th>
+                    <td>'.number_format($stats['tempo']['rouge']['consobydayhp'] + $stats['tempo']['rouge']['consobydayhc'], 2).'</td>
+                    <td>'.number_format($stats['tempo']['blanc']['consobydayhp'] + $stats['tempo']['blanc']['consobydayhc'], 2).'</td>
+                    <td>'.number_format($stats['tempo']['bleu']['consobydayhp'] + $stats['tempo']['bleu']['consobydayhc'], 2).'</td>
+                    <td>'.'</td>
                 </tr>
+								<tr>
+                    <th>Tempo - Coût HP</th>
+                    <td>'.number_format($stats['tempo']['rouge']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['blanc']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['bleu']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['total']['costhp'], 2).' €</td>
+                </tr>
+								<tr>
+                    <th>Tempo - Coût HC</th>
+                    <td>'.number_format($stats['tempo']['rouge']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['blanc']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['bleu']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['total']['costhc'], 2).' €</td>
+                </tr>
+								<tr>
+                    <th>Tempo - Coût HP + HC</th>
+                    <td>'.number_format($stats['tempo']['rouge']['costhp'] + $stats['tempo']['rouge']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['blanc']['costhp'] + $stats['tempo']['blanc']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['bleu']['costhp'] + $stats['tempo']['bleu']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempo']['total']['costhp'] + $stats['tempo']['total']['costhc'], 2).' €</td>
+                </tr>
+						</table>
 					';
 				if ($isTempoCorrected) {
 					$detailTempoTable .= '
+						<hr class="hr hr-blurry" />
+						<h4>
+                Détail de la consommation Tempo corrigé (1)
+            </h4>
+						<table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Rouge</th>
+                    <th>Blanc</th>
+                    <th>Bleu</th>
+										<th>Total</th>
+                </tr>
 								<tr>
                     <th>Tempo corrigé (1) - Nombre de jours</th>
-                    <td>'.number_format($nbTempoCorrectedRed, 0).'</td>
-                    <td>'.number_format($nbTempoCorrectedWhite, 0).'</td>
-                    <td>'.number_format($nbTempoCorrectedBlue, 0).'</td>
-                    <td>'.number_format($nbTempoCorrectedRed + $nbTempoCorrectedWhite + $nbTempoCorrectedBlue, 0).'</td>
+                    <td>'.number_format($stats['tempocorrected']['rouge']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempocorrected']['blanc']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempocorrected']['bleu']['days'], 0).'</td>
+                    <td>'.number_format($stats['tempocorrected']['total']['days'], 0).'</td>
                 </tr>
 								<tr>
-                    <th>Tempo corrigé (1) - Consommation</th>
-                    <td>'.number_format($sumTempoCorrectedRed, 2).'€</td>
-                    <td>'.number_format($sumTempoCorrectedWhite, 2).'€</td>
-                    <td>'.number_format($sumTempoCorrectedBlue, 2).'€</td>
-                    <td>'.number_format($sumTempoCorrectedRed + $sumTempoCorrectedWhite + $sumTempoCorrectedBlue, 2).'€</td>
+                    <th>Tempo corrigé (1) - Coût HP</th>
+                    <td>'.number_format($stats['tempocorrected']['rouge']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['blanc']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['bleu']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['total']['costhp'], 2).' €</td>
                 </tr>
+								<tr>
+                    <th>Tempo corrigé (1) - Coût HC</th>
+                    <td>'.number_format($stats['tempocorrected']['rouge']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['blanc']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['bleu']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['total']['costhc'], 2).' €</td>
+                </tr>
+								<tr>
+                    <th>Tempo corrigé (1) - Coût HP + HC</th>
+                    <td>'.number_format($stats['tempocorrected']['rouge']['costhp'] + $stats['tempocorrected']['rouge']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['blanc']['costhp'] + $stats['tempocorrected']['blanc']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['bleu']['costhp'] + $stats['tempocorrected']['bleu']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['tempocorrected']['total']['costhp'] + $stats['tempocorrected']['total']['costhc'], 2).' €</td>
+                </tr>
+						</table>	
 					';
 				}
-				$detailTempoTable .= '
-            </table>
-					';
 				
 				$detailHCHPTable = '
 						<hr class="hr hr-blurry" />
@@ -381,10 +459,10 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 										<th>Total</th>
                 </tr>
 								<tr>
-                    <th>Heures Creuses - Consommation</th>
-                    <td>'.number_format($sumHP, 2).'€</td>
-                    <td>'.number_format($sumHC, 2).'€</td>
-                    <td>'.number_format($sumHP+ $sumHC , 2).'€</td>
+                    <th>Heures Creuses - Coût</th>
+                    <td>'.number_format($stats['hchp']['costhp'], 2).' €</td>
+                    <td>'.number_format($stats['hchp']['costhc'], 2).' €</td>
+                    <td>'.number_format($stats['hchp']['costhp']+ $stats['hchp']['costhc'] , 2).' €</td>
                 </tr>
 						</table>
 					';
@@ -412,19 +490,40 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
         crossorigin="anonymous"></script>
 
 <div class="container">
-    <h1>Comparatif de facture Base / Heures Creuses / Tempo</h1>
+    <h2>Comparatif de facture Base / Heures Creuses / Tempo</h2>
 		
     <form id="parametersform" action="/" method="POST" enctype="multipart/form-data">
+		
+        <fieldset>
+            <legend>Consommation</legend>
+						<div class="row mb-3">
+                <div class="col">
+                    <label for="conso_file" class="form-label">Fichier de consommation horaire (CSV)</label>
+                    <input type="file" class="form-control" name="conso_file" id="conso_file">
+                    <p class="small">
+                        Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
+                    </p>
+                </div>
+                <div class="col">
+                    <label for="excludeDays" class="form-label">Jours à exclure</label>
+                    <input type="text" class="form-control" name="excludeDays" id="excludeDays" value="<?php
+                    echo $excludeDays; ?>" placeholder="">
+										<p class="small">Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
+                        <code>05/02/2022;06/02/2022;13/02/2022</code></p>
+                </div>
+            </div>
+        </fieldset>
+		
         <fieldset>
             <legend>Option Base</legend>
             <div class="row mb-3">
                 <div class="col">
-                    <label for="aboBase" class="form-label">Abonnement mensuel base</label>
+                    <label for="aboBase" class="form-label">Abonnement mensuel base (€ TTC)</label>
                     <input type="text" class="form-control" name="aboBase" id="aboBase" value="<?php
                     echo $aboBase; ?>" placeholder="15">
                 </div>
                 <div class="col">
-                    <label for="tarifBase" class="form-label">Tarif base</label>
+                    <label for="tarifBase" class="form-label">Tarif base (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifBase" id="tarifBase" value="<?php
                     echo $tarifBase; ?>" placeholder="0.1659">
                 </div>
@@ -435,17 +534,17 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             <legend>Option Heures Creuses</legend>
             <div class="row mb-3">
                 <div class="col">
-                    <label for="aboHCHP" class="form-label">Abonnement HC/HP</label>
+                    <label for="aboHCHP" class="form-label">Abonnement mensuel HC/HP (€ TTC)</label>
                     <input type="text" class="form-control" name="aboHCHP" id="aboHCHP" value="<?php
                     echo $aboHCHP; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifHP" class="form-label">Tarif HP</label>
+                    <label for="tarifHP" class="form-label">Tarif HP (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifHP" id="tarifHP" value="<?php
                     echo $tarifHP; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifHC" class="form-label">Tarif HC</label>
+                    <label for="tarifHC" class="form-label">Tarif HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifHC" id="tarifHC" value="<?php
                     echo $tarifHC; ?>" placeholder="">
                 </div>
@@ -472,66 +571,48 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
             <legend>Option Tempo</legend>
             <div class="row mb-3">
                 <div class="col">
-                    <label for="aboTempo" class="form-label">Abonnement Tempo</label>
+                    <label for="aboTempo" class="form-label">Abonnement mensuel Tempo (€ TTC)</label>
                     <input type="text" class="form-control" name="aboTempo" id="aboTempo" value="<?php
                     echo $aboTempo; ?>" placeholder="15">
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <label for="tarifTempoRedHP" class="form-label">Tarif Tempo Rouge HP</label>
+                    <label for="tarifTempoRedHP" class="form-label">Tarif Tempo Rouge HP (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoRedHP" id="tarifTempoRedHP" value="<?php
                     echo $tarifTempoRedHP; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifTempoWhiteHP" class="form-label">Tarif Tempo Blanc HP</label>
+                    <label for="tarifTempoWhiteHP" class="form-label">Tarif Tempo Blanc HP (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoWhiteHP" id="tarifTempoWhiteHP" value="<?php
                     echo $tarifTempoWhiteHP; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifTempoBlueHP" class="form-label">Tarif Tempo Bleu HP</label>
+                    <label for="tarifTempoBlueHP" class="form-label">Tarif Tempo Bleu HP (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoBlueHP" id="tarifTempoBlueHP" value="<?php
                     echo $tarifTempoBlueHP; ?>" placeholder="">
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <label for="tarifTempoRedHC" class="form-label">Tarif Tempo Rouge HC</label>
+                    <label for="tarifTempoRedHC" class="form-label">Tarif Tempo Rouge HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoRedHC" id="tarifTempoRedHC" value="<?php
                     echo $tarifTempoRedHC; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifTempoWhiteHC" class="form-label">Tarif Tempo Blanc HC</label>
+                    <label for="tarifTempoWhiteHC" class="form-label">Tarif Tempo Blanc HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoWhiteHC" id="tarifTempoWhiteHC" value="<?php
                     echo $tarifTempoWhiteHC; ?>" placeholder="">
                 </div>
                 <div class="col">
-                    <label for="tarifTempoBlueHC" class="form-label">Tarif Tempo Bleu HC</label>
+                    <label for="tarifTempoBlueHC" class="form-label">Tarif Tempo Bleu HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoBlueHC" id="tarifTempoBlueHC" value="<?php
                     echo $tarifTempoBlueHC; ?>" placeholder="">
                 </div>
             </div>
         </fieldset>
-
-        <fieldset>
-            <legend>Consommation</legend>
-						<div class="row mb-3">
-                <div class="col">
-                    <label for="conso_file" class="form-label">Fichier de consommation horaire (CSV)</label>
-                    <input type="file" class="form-control" name="conso_file" id="conso_file">
-                    <p class="small">
-                        Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
-                    </p>
-                </div>
-                <div class="col">
-                    <label for="excludeDays" class="form-label">Jours à exclure</label>
-                    <input type="text" class="form-control" name="excludeDays" id="excludeDays" value="<?php
-                    echo $excludeDays; ?>" placeholder="">
-										<p class="small">Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
-                        <code>05/02/2022;06/02/2022;13/02/2022</code></p>
-                </div>
-            </div>
-        </fieldset>
+				
+				<hr class="hr hr-blurry" />
 
         <div class="mb-3">
             <label for="export">
