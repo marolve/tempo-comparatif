@@ -267,14 +267,16 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 		$totalZenWE = $stats['zenWE']['week']['cost'] + $stats['zenWE']['weekend']['cost'] + $aboZenWE * $nbMonths;
 		$consoZenWEHCHP = $stats['zenWEHCHP']['week']['costhp'] + $stats['zenWEHCHP']['week']['costhc'] + $stats['zenWEHCHP']['weekend']['costhp'] + $stats['zenWEHCHP']['weekend']['costhc'];
 		$totalZenWEHCHP = $consoZenWEHCHP + $aboZenWEHCHP * $nbMonths;
-		$stats['tempo']['rouge']['consobydayhp'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohp'] / $stats['tempo']['rouge']['days'];
-		$stats['tempo']['rouge']['consobydayhc'] = $stats['tempo']['rouge']['days'] == 0 ? 0.0 : $stats['tempo']['rouge']['consohc'] / $stats['tempo']['rouge']['days'];
-		$stats['tempo']['blanc']['consobydayhp'] = $stats['tempo']['blanc']['days'] == 0 ? 0.0 : $stats['tempo']['blanc']['consohp'] / $stats['tempo']['blanc']['days'];
-		$stats['tempo']['blanc']['consobydayhc'] = $stats['tempo']['blanc']['days'] == 0 ? 0.0 : $stats['tempo']['blanc']['consohc'] / $stats['tempo']['blanc']['days'];
-		$stats['tempo']['bleu']['consobydayhp'] = $stats['tempo']['bleu']['days'] == 0 ? 0.0 : $stats['tempo']['bleu']['consohp'] / $stats['tempo']['bleu']['days'];
-		$stats['tempo']['bleu']['consobydayhc'] = $stats['tempo']['bleu']['days'] == 0 ? 0.0 : $stats['tempo']['bleu']['consohc'] / $stats['tempo']['bleu']['days'];
-		$stats['tempo']['total']['consobydayhp'] = $stats['tempo']['total']['days'] == 0 ? 0.0 : $stats['tempo']['total']['consohp'] / $stats['tempo']['total']['days'];
-		$stats['tempo']['total']['consobydayhc'] = $stats['tempo']['total']['days'] == 0 ? 0.0 : $stats['tempo']['total']['consohc'] / $stats['tempo']['total']['days'];
+		foreach (array('rouge', 'blanc', 'bleu') as $couleur) {
+			if ($stats['tempo'][$couleur]['days'] == 0) {
+				$stats['tempo'][$couleur]['consobydayhp'] = 0.0;
+				$stats['tempo'][$couleur]['consobydayhc'] = 0.0;
+			}
+			else {
+				$stats['tempo'][$couleur]['consobydayhp'] = $stats['tempo'][$couleur]['consohp'] / $stats['tempo'][$couleur]['days'];
+				$stats['tempo'][$couleur]['consobydayhc'] = $stats['tempo'][$couleur]['consohc'] / $stats['tempo'][$couleur]['days'];
+			}
+		}
 		
 		$aboTempoCorrected = 0;
 		$totalTempoCorrected = 0;
@@ -288,35 +290,19 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
       $stdTempoAllColors = $stdTempoRed + $stdTempoWhite + $stdTempoBlue;			
 			$nbTempoAllColors = 0.0 + $stats['tempo']['rouge']['days'] + $stats['tempo']['blanc']['days'] + $stats['tempo']['bleu']['days'];
 			$stats['tempocorrected']['rouge']['days'] = ($stdTempoRed/$stdTempoAllColors) * $nbTempoAllColors;
-			$stats['tempocorrected']['rouge']['costhp'] = $stats['tempo']['rouge']['costhp'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
-			$stats['tempocorrected']['rouge']['costhc'] = $stats['tempo']['rouge']['costhc'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
-			$stats['tempocorrected']['rouge']['consohp'] = $stats['tempo']['rouge']['consohp'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
-			$stats['tempocorrected']['rouge']['consohc'] = $stats['tempo']['rouge']['consohc'] * $stats['tempocorrected']['rouge']['days'] / $stats['tempo']['rouge']['days'];
 			$stats['tempocorrected']['blanc']['days'] = ($stdTempoWhite/$stdTempoAllColors) * $nbTempoAllColors;
-			$stats['tempocorrected']['blanc']['costhp'] = $stats['tempo']['blanc']['costhp'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
-			$stats['tempocorrected']['blanc']['costhc'] = $stats['tempo']['blanc']['costhc'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
-			$stats['tempocorrected']['blanc']['consohp'] = $stats['tempo']['blanc']['consohp'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
-			$stats['tempocorrected']['blanc']['consohc'] = $stats['tempo']['blanc']['consohc'] * $stats['tempocorrected']['blanc']['days'] / $stats['tempo']['blanc']['days'];
 			$stats['tempocorrected']['bleu']['days'] = ($stdTempoBlue/$stdTempoAllColors) * $nbTempoAllColors;
-			$stats['tempocorrected']['bleu']['costhp'] = $stats['tempo']['bleu']['costhp'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
-			$stats['tempocorrected']['bleu']['costhc'] = $stats['tempo']['bleu']['costhc'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
-			$stats['tempocorrected']['bleu']['consohp'] = $stats['tempo']['bleu']['consohp'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
-			$stats['tempocorrected']['bleu']['consohc'] = $stats['tempo']['bleu']['consohc'] * $stats['tempocorrected']['bleu']['days'] / $stats['tempo']['bleu']['days'];
-			$stats['tempocorrected']['total']['days'] = $stats['tempocorrected']['rouge']['days'] 
-																								+ $stats['tempocorrected']['blanc']['days']
-																								+ $stats['tempocorrected']['bleu']['days'];
-			$stats['tempocorrected']['total']['costhp'] = $stats['tempocorrected']['rouge']['costhp']
-																									+ $stats['tempocorrected']['blanc']['costhp']
-																									+ $stats['tempocorrected']['bleu']['costhp'];
-			$stats['tempocorrected']['total']['costhc'] = $stats['tempocorrected']['rouge']['costhc'] 
-																									+ $stats['tempocorrected']['blanc']['costhc'] 
-																									+ $stats['tempocorrected']['bleu']['costhc'];
-			$stats['tempocorrected']['total']['consohp'] = $stats['tempocorrected']['rouge']['consohp']
-																									+ $stats['tempocorrected']['blanc']['consohp']
-																									+ $stats['tempocorrected']['bleu']['consohp'];
-			$stats['tempocorrected']['total']['consohc'] = $stats['tempocorrected']['rouge']['consohc'] 
-																									+ $stats['tempocorrected']['blanc']['consohc'] 
-																									+ $stats['tempocorrected']['bleu']['consohc'];
+			foreach (array('rouge', 'blanc', 'bleu') as $couleur) {
+				$stats['tempocorrected'][$couleur]['costhp'] = $stats['tempo'][$couleur]['costhp'] * $stats['tempocorrected'][$couleur]['days'] / $stats['tempo'][$couleur]['days'];
+				$stats['tempocorrected'][$couleur]['costhc'] = $stats['tempo'][$couleur]['costhc'] * $stats['tempocorrected'][$couleur]['days'] / $stats['tempo'][$couleur]['days'];
+				$stats['tempocorrected'][$couleur]['consohp'] = $stats['tempo'][$couleur]['consohp'] * $stats['tempocorrected'][$couleur]['days'] / $stats['tempo'][$couleur]['days'];
+				$stats['tempocorrected'][$couleur]['consohc'] = $stats['tempo'][$couleur]['consohc'] * $stats['tempocorrected'][$couleur]['days'] / $stats['tempo'][$couleur]['days'];
+				$stats['tempocorrected']['total']['days'] += $stats['tempocorrected'][$couleur]['days'];
+				$stats['tempocorrected']['total']['costhp'] += $stats['tempocorrected'][$couleur]['costhp'];
+				$stats['tempocorrected']['total']['costhc'] += $stats['tempocorrected'][$couleur]['costhc'];
+				$stats['tempocorrected']['total']['consohp'] += $stats['tempocorrected'][$couleur]['consohp'];
+				$stats['tempocorrected']['total']['consohc'] += $stats['tempocorrected'][$couleur]['consohc'];
+			}
 			$aboTempoCorrected = $aboTempo;
 			$totalTempoCorrected = $stats['tempocorrected']['total']['costhp'] + $stats['tempocorrected']['total']['costhc'] + $aboTempo * $nbMonths;
 		}
@@ -799,7 +785,14 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 
     <?php
     if (isset($totalTable)) {
+				
         echo $totalTable;
+				
+				echo '
+				  <a id="btn_details" href="#">Montrer les détails du calcul</a>
+					<div id="details">
+				';
+				
 				if (isset($detailTempoTable)) {
 					echo $detailTempoTable;
 				}
@@ -815,9 +808,28 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				if (isset($comment)) {
 					echo $comment;
 				}
+				
+				echo '</div>';
+				
 				echo '
 					<script type="text/javascript">
+
+						document.getElementById("btn_details").onclick = function(event) {
+							var divDetails = document.getElementById("details");
+							var btnDetails = document.getElementById("btn_details");
+							if (divDetails.style.display = divDetails.style.display == "none") {
+								divDetails.style.display = "block";
+								btnDetails.innerHTML = "Masquer les détails du calcul";
+							} else {
+								divDetails.style.display = "none";
+								btnDetails.innerHTML = "Montrer les détails du calcul";
+							}
+							 event.preventDefault();
+						}
+
 						document.getElementById("parametersform").style.display = "none";
+						document.getElementById("details").style.display = "none";
+					
 					</script>
 				';
     } ?>
