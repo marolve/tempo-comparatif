@@ -3,7 +3,7 @@
 Cette interface permet de comparer votre facture passée a celle que vous auriez eue avec un tarif de base, heures creuses, EDF Tempo ou Zen Week-End.
 
 Vos données de consommation horaire peuvent être récupérées sur https://www.enedis.fr/particulier dans la rubrique "Suivre mes mesures" puis cliquer sur "Télécharger mes données"
-Il faut choisir l'option "Consommation horaire". Enedis ne conserve que 2 ans d'historique
+Il faut choisir l'option "Consommation horaire". Enedis ne conserve que 2 ans d'historique.
 
 C'est une variante du très bon travail de Guillaume Frémont (disponible ici : https://tarifelec.vraiment.top et le code : https://github.com/grimmlink/tempo-comparatif )
 
@@ -14,4 +14,4 @@ Nouveautés de cette version :
 - ajout des détails de calcul pour les différentes options
 - plus besoin de supprimer les entêtes du fichier horaires Enedis
 
-Instance disponible ici : https://electricite-calcul.onrender.com/
+Une instance est disponible ici : https://electricite-calcul.onrender.com/ (patientez quelque secondes pour le redémarrage du serveur).

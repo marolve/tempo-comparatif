@@ -340,6 +340,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     } else {
 			  $comment = '';
         $totalTable = '
+						<hr class="hr hr-blurry" />
             <h3>
                 Période du '.$consos[0]['date']->format('d/m/Y').' au '.$consos[count($consos) - 1]['date']->format('d/m/Y').'
                  - Consommation totale : '.($totalConso / 1000).' kWh
@@ -358,7 +359,9 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <td>'.number_format($sumBase, 2).' €</td>
                     <td>'.number_format($totalBase, 2).' €</td>
                     <td></td>
-                </tr>
+                </tr>';
+				if (!$isTempoCorrected) {
+					$totalTable .= '
                 <tr>
                     <th>Tempo</th>
                     <td>'.number_format($aboTempo * $nbMonths, 2).' €</td>
@@ -366,7 +369,8 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <td>'.number_format($totalTempo, 2).' €</td>
                     <td>'.number_format(100 - (100 * $totalTempo / $totalBase), 2).'%</td>
                 </tr>';
-				if ($isTempoCorrected) {
+				}
+				else {
 					$totalTable .= '
                 <tr>
                     <th>Tempo corrigé (1)</th>
@@ -787,6 +791,10 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     if (isset($totalTable)) {
 				
         echo $totalTable;
+
+				if (isset($comment)) {
+					echo '<div>'.$comment.'</div>';
+				}
 				
 				echo '
 				  <a id="btn_details" href="#">Montrer les détails du calcul</a>
@@ -804,9 +812,6 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				}
 				if (isset($detailZenWEHCHPTable)) {
 					echo $detailZenWEHCHPTable;
-				}
-				if (isset($comment)) {
-					echo $comment;
 				}
 				
 				echo '</div>';
