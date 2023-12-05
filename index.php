@@ -68,11 +68,13 @@ function getPeriodsHC($horHC1, $horHC2) {
 function loadTempoHisto($fileName) {
 	global $dateHistoMin, $dateHistoMax, $tempoHisto;
 	$tempoHistoJson = json_decode(file_get_contents($fileName), true);
-	foreach ($tempoHistoJson['dates'] as $item) {
-		$date = strtotime($item['date']);
-		$dateHistoMin = min($date, $dateHistoMin);
-		$dateHistoMax = max($date, $dateHistoMax);
-		$tempoHisto[$item['date']] = $item['couleur'];
+	if (is_array($tempoHistoJson)) {
+		foreach ($tempoHistoJson['dates'] as $item) {
+			$date = strtotime($item['date']);
+			$dateHistoMin = min($date, $dateHistoMin);
+			$dateHistoMax = max($date, $dateHistoMax);
+			$tempoHisto[$item['date']] = $item['couleur'];
+		}
 	}
 }
 
