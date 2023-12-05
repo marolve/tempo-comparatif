@@ -23,6 +23,9 @@ $tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.1881;
 $tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.1881;
 $tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.1881;
 $excludeDays = $_POST['excludeDays'] ?? '';
+$tempoHisto = [];
+$dateHistoMin = PHP_INT_MAX;
+$dateHistoMax = 0;
 
 //$tempoHistoYear = 2022;
 //while($tempoHistoYear <= date('Y')) {
@@ -62,6 +65,19 @@ function getPeriodsHC($horHC1, $horHC2) {
 	return $periods;
 }
 
+function loadTempoHisto($fileName) {
+	global $dateHistoMin, $dateHistoMax, $tempoHisto;
+	$tempoHistoJson = json_decode(file_get_contents($fileName), true);
+	foreach ($tempoHistoJson['dates'] as $item) {
+		$date = strtotime($item['date']);
+		$dateHistoMin = min($date, $dateHistoMin);
+		$dateHistoMax = max($date, $dateHistoMax);
+		$tempoHisto[$item['date']] = $item['couleur'];
+	}
+}
+
+loadTempoHisto('tempo.json');
+
 if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['horaireHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
 
@@ -93,13 +109,11 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
     $prevMonth = null;
     $totalConso = 0;
 		
-    // Histo Tempo
-    $tempoHistoJson = json_decode(file_get_contents('tempo.json'),
-        true);
-    foreach ($tempoHistoJson['dates'] as $item) {
-        $tempoHisto[$item['date']] = $item['couleur'];
-    }
-
+		// Tempo optionnel
+		if (file_exists($_FILES['tempo_file']['tmp_name'])) {
+			loadTempoHisto($_FILES['tempo_file']['tmp_name']);
+		}
+		
     // Prepare conso
     if (($handle = fopen($_FILES['conso_file']['tmp_name'], "r")) !== false) {
         $hasHeader = false;
@@ -373,7 +387,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				else {
 					$totalTable .= '
                 <tr>
-                    <th>Tempo corrigé (1)</th>
+                    <th>Tempo ajusté (1)</th>
                     <td>'.number_format($aboTempoCorrected * $nbMonths, 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['total']['costhp'] + $stats['tempocorrected']['total']['costhc'], 2).' €</td>
                     <td>'.number_format($totalTempoCorrected, 2).' €</td>
@@ -458,7 +472,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 					$detailTempoTable .= '
 						<hr class="hr hr-blurry" />
 						<h4>
-                Détail de la consommation Tempo corrigé (1)
+                Détail de la consommation Tempo ajusté (1)
             </h4>
 						<table class="table table-striped">
                 <tr>
@@ -469,28 +483,28 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 										<th>Total</th>
                 </tr>
 								<tr>
-                    <th>Tempo corrigé (1) - Nombre de jours</th>
+                    <th>Tempo ajusté (1) - Nombre de jours</th>
                     <td>'.number_format($stats['tempocorrected']['rouge']['days'], 0).'</td>
                     <td>'.number_format($stats['tempocorrected']['blanc']['days'], 0).'</td>
                     <td>'.number_format($stats['tempocorrected']['bleu']['days'], 0).'</td>
                     <td>'.number_format($stats['tempocorrected']['total']['days'], 0).'</td>
                 </tr>
 								<tr>
-                    <th>Tempo corrigé (1) - Coût HP</th>
+                    <th>Tempo ajusté (1) - Coût HP</th>
                     <td>'.number_format($stats['tempocorrected']['rouge']['costhp'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['blanc']['costhp'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['bleu']['costhp'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['total']['costhp'], 2).' €</td>
                 </tr>
 								<tr>
-                    <th>Tempo corrigé (1) - Coût HC</th>
+                    <th>Tempo ajusté (1) - Coût HC</th>
                     <td>'.number_format($stats['tempocorrected']['rouge']['costhc'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['blanc']['costhc'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['bleu']['costhc'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['total']['costhc'], 2).' €</td>
                 </tr>
 								<tr>
-                    <th>Tempo corrigé (1) - Coût HP + HC</th>
+                    <th>Tempo ajusté (1) - Coût HP + HC</th>
                     <td>'.number_format($stats['tempocorrected']['rouge']['costhp'] + $stats['tempocorrected']['rouge']['costhc'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['blanc']['costhp'] + $stats['tempocorrected']['blanc']['costhc'], 2).' €</td>
                     <td>'.number_format($stats['tempocorrected']['bleu']['costhp'] + $stats['tempocorrected']['bleu']['costhc'], 2).' €</td>
@@ -577,7 +591,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				
 				if ($isTempoCorrected) {
 					$comment .= '<footer class="blockquote-footer">
-											(1) - Tempo corrigé recalcule l\'option pour obtenir le nombre de jours annuels contractuels : 22 jours rouges, 33 jours blancs et 300 ou 301 jours bleus
+											(1) - Tempo ajusté : recalcul de l\'option pour obtenir le nombre de jours annuels contractuels : 22 jours rouges, 33 jours blancs et 300 ou 301 jours bleus
 											</footer>
 					';
 				}
@@ -614,7 +628,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     </p>
                 </div>
                 <div class="col">
-                    <label for="excludeDays" class="form-label">Jours à exclure</label>
+                    <label for="excludeDays" class="form-label">Jours à exclure (Optionnel)</label>
                     <input type="text" class="form-control" name="excludeDays" id="excludeDays" value="<?php
                     echo $excludeDays; ?>" placeholder="">
 										<p class="small">Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
@@ -667,7 +681,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                         <code>2200-0600</code></p>
                 </div>
                 <div class="col">
-                    <label for="horaireHC2" class="form-label">Horaire HC 2</label>
+                    <label for="horaireHC2" class="form-label">Horaire HC 2 (Optionnel)</label>
                     <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
                     echo $horaireHC2; ?>" placeholder="">
                     <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
@@ -717,6 +731,15 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <label for="tarifTempoBlueHC" class="form-label">Tarif Tempo Bleu HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifTempoBlueHC" id="tarifTempoBlueHC" value="<?php
                     echo $tarifTempoBlueHC; ?>" placeholder="">
+                </div>
+            </div>
+						<div class="row mb-3">
+                <div class="col">
+                    <label for="tempo_file" class="form-label">Fichier historique des jours Tempo (JSON) (Optionnel)</label>
+                    <input type="file" class="form-control" name="tempo_file" id="tempo_file">
+                    <p class="small">
+                        Les jours Tempo sont déjà renseignés du <?php echo date('d/m/Y', $dateHistoMin); ?> au <?php echo date('d/m/Y', $dateHistoMax); ?>
+                    </p>
                 </div>
             </div>
         </fieldset>

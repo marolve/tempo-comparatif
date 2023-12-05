@@ -1,4 +1,4 @@
-# TarifElec
+# Electricité calcul
 
 Cette interface permet de comparer votre facture passée a celle que vous auriez eue avec un tarif de base, heures creuses, EDF Tempo ou Zen Week-End.
 
@@ -9,9 +9,10 @@ C'est une variante du très bon travail de Guillaume Frémont (disponible ici : 
 
 Nouveautés de cette version :
 - possibilité de modifier tous les paramètres de calcul (sauf les dates des couleurs des jours Tempo, disponible dans le fichier tempo.json).
-- ajout d'un calcul Tempo "corrigé" qui lorsqu'on a suffisamment de données, permet de rétablir la même proportion de jours rouges et blancs tels que spécifiés dans le contrat (22 jours rouges et 33 jours blancs)
+- ajout d'un calcul Tempo "ajusté" qui lorsqu'on a suffisamment de données, permet de rétablir la même proportion de jours rouges et blancs tels que spécifiés dans le contrat (22 jours rouges et 33 jours blancs)
 - ajout de l'option Zen Week-End
 - ajout des détails de calcul pour les différentes options
 - plus besoin de supprimer les entêtes du fichier horaires Enedis
+- ajout de la possibilité de spécifier un fichier des jours tempos supplémentaire au format json
 
 Une instance est disponible ici : https://electricite-calcul.onrender.com/ (patientez quelque secondes pour le redémarrage du serveur).
