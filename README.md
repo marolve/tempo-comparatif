@@ -15,4 +15,4 @@ Nouveautés de cette version :
 - plus besoin de supprimer les entêtes du fichier horaires Enedis
 - ajout de la possibilité de spécifier un fichier des jours tempos supplémentaire au format json
 
-Une instance est disponible ici : https://electricite-calcul.onrender.com/ (patientez quelque secondes pour le redémarrage du serveur).
+Une instance est disponible ici : https://electricite-calcul.onrender.com/ (patientez quelques secondes pour le redémarrage du serveur).
