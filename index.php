@@ -379,7 +379,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 				if (!$isTempoCorrected) {
 					$totalTable .= '
                 <tr>
-                    <th>Tempo</th>
+                    <th>Tempo (1)</th>
                     <td>'.number_format($aboTempo * $nbMonths, 2).' €</td>
                     <td>'.number_format($stats['tempo']['total']['costhp'] + $stats['tempo']['total']['costhc'], 2).' €</td>
                     <td>'.number_format($totalTempo, 2).' €</td>
@@ -596,6 +596,11 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 											(1) - Tempo ajusté : recalcul de l\'option pour obtenir le nombre de jours annuels contractuels : 22 jours rouges, 33 jours blancs et 300 ou 301 jours bleus
 											</footer>
 					';
+				} else {
+					$comment .= '<footer class="blockquote-footer">
+											(1) - Tempo : il y a trop peu de données historiques pour l\'estimation de \'option Tempo
+											</footer>
+					';
 				}
     }
 }
@@ -617,7 +622,15 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 <div class="container">
     <h2>Comparatif Electricité Base - Heures Creuses - Tempo - Zen Week End</h2>
 		
+		
     <form id="parametersform" action="/" method="POST" enctype="multipart/form-data">
+		
+		<legend>Présentation</legend>
+		Cette page permet d'obtenir une estimation des tarifs de consommation électrique selon plusieurs options d'abonnements.<br/>
+		Le calcul se base sur votre consommation personnelle passée dont vous pouvez obtenir le détail sur le site <a href="https://mon-compte-client.enedis.fr/">Enedis</a>.<br/>
+		Pour l'option Tempo, il est important que vous ayez au moins des données historiques de toute une saison froide.<br/>
+		Vérifiez que les <a href="https://www.enedis.fr/faq/gerer-sa-consommation-delectricite/comment-connaitre-les-horaires-dheures-creuses">plages des horaires des heures creuses</a> correspondent bien aux vôtres. Cela ne concerne pas l'option Tempo qui utilise la plage 22h-06h pour tous les clients.<br/>
+		Pour tester des fournisseurs alternatifs, il suffit de modifier les paramètres des options Base ou Heures Creuses.<br/>
 		
         <fieldset>
             <legend>Consommation</legend>
@@ -626,15 +639,43 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <label for="conso_file" class="form-label">Fichier de consommation horaire (CSV)</label>
                     <input type="file" class="form-control" name="conso_file" id="conso_file">
                     <p class="small">
-                        Fichier CSV récupéré sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>
+                        Fichier de consommation <u>horaire</u> à télécharger sur <a href="https://mon-compte-particulier.enedis.fr/suivi-de-mesures">Enedis</a>. <br/>
+                        Il faut avoir préalablement activé la collecte de la consommation horaire.
                     </p>
                 </div>
                 <div class="col">
                     <label for="excludeDays" class="form-label">Jours à exclure (Optionnel)</label>
                     <input type="text" class="form-control" name="excludeDays" id="excludeDays" value="<?php
                     echo $excludeDays; ?>" placeholder="">
-										<p class="small">Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
-                        <code>05/02/2022;06/02/2022;13/02/2022</code></p>
+										<p class="small">
+											Liste de jours où la consommation électrique était exceptionnelle et qui à priori ne devraient pas se reproduire à l'avenir <br/>(par exemple absence prolongée exceptionnelle, utilisation d'un radiateur électrique après une panne de chaudière etc)<br/>
+											Format : <code>JJ/MM/AAAA;...</code><br/>Exemple :
+                        <code>05/02/2022;06/02/2022;13/02/2022</code>
+										</p>
+                </div>
+            </div>
+        </fieldset>
+				
+        <fieldset>
+            <legend>Plages horaires Heures Creuses</legend>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="horaireHC1" class="form-label">Plage horaire HC 1</label>
+                    <input type="text" class="form-control" name="horaireHC1" id="horaireHC1" value="<?php
+                    echo $horaireHC1; ?>" placeholder="">
+                    <p class="small">
+										Concerne l'option Heures Creuses et l'option Zen Week-End Heures Creuses uniquement.<br/>
+										Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>2200-0600</code></p>
+                </div>
+                <div class="col">
+                    <label for="horaireHC2" class="form-label">Plage horaire HC 2 (Optionnel)</label>
+                    <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
+                    echo $horaireHC2; ?>" placeholder="">
+                    <p class="small">
+										Concerne l'option Heures Creuses et l'option Zen Week-End Heures Creuses uniquement.<br/>
+										Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
+                        <code>1230-1430</code></p>
                 </div>
             </div>
         </fieldset>
@@ -672,22 +713,6 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
                     <label for="tarifHC" class="form-label">Tarif HC (€ TTC)</label>
                     <input type="text" class="form-control" name="tarifHC" id="tarifHC" value="<?php
                     echo $tarifHC; ?>" placeholder="">
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="horaireHC1" class="form-label">Horaire HC 1</label>
-                    <input type="text" class="form-control" name="horaireHC1" id="horaireHC1" value="<?php
-                    echo $horaireHC1; ?>" placeholder="">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
-                        <code>2200-0600</code></p>
-                </div>
-                <div class="col">
-                    <label for="horaireHC2" class="form-label">Horaire HC 2 (Optionnel)</label>
-                    <input type="text" class="form-control" name="horaireHC2" id="horaireHC2" value="<?php
-                    echo $horaireHC2; ?>" placeholder="">
-                    <p class="small">Format : <code>début[hhmm]-fin[hhmm]</code>.<br/>Exemple :
-                        <code>1230-1430</code></p>
                 </div>
             </div>
         </fieldset>
