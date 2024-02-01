@@ -1,27 +1,27 @@
 <?php
 
-$tarifBase = $_POST['tarifBase'] ?? 0.2276;
-$aboBase = $_POST['aboBase'] ?? 12.44;
+$tarifBase = $_POST['tarifBase'] ?? 0.2516;
+$aboBase = $_POST['aboBase'] ?? 12.60;
 $horaireHC1 = $_POST['horaireHC1'] ?? '2200-0600';
 $horaireHC2 = $_POST['horaireHC2'] ?? '';
-$tarifHP = $_POST['tarifHP'] ?? 0.2460;
-$tarifHC = $_POST['tarifHC'] ?? 0.1828;
-$aboHCHP = $_POST['aboHCHP'] ?? 12.85;
-$aboTempo = $_POST['aboTempo'] ?? 12.80;
-$tarifTempoRedHP = $_POST['tarifTempoRedHP'] ?? 0.7324;
-$tarifTempoRedHC = $_POST['tarifTempoRedHC'] ?? 0.1328;
-$tarifTempoWhiteHP = $_POST['tarifTempoWhiteHP'] ?? 0.1654;
-$tarifTempoWhiteHC = $_POST['tarifTempoWhiteHC'] ?? 0.1246;
-$tarifTempoBlueHP = $_POST['tarifTempoBlueHP'] ?? 0.1369;
-$tarifTempoBlueHC = $_POST['tarifTempoBlueHC'] ?? 0.1056;
+$tarifHP = $_POST['tarifHP'] ?? 0.2700;
+$tarifHC = $_POST['tarifHC'] ?? 0.2068;
+$aboHCHP = $_POST['aboHCHP'] ?? 13.01;
+$aboTempo = $_POST['aboTempo'] ?? 12.96;
+$tarifTempoRedHP = $_POST['tarifTempoRedHP'] ?? 0.7562;
+$tarifTempoRedHC = $_POST['tarifTempoRedHC'] ?? 0.1568;
+$tarifTempoWhiteHP = $_POST['tarifTempoWhiteHP'] ?? 0.1894;
+$tarifTempoWhiteHC = $_POST['tarifTempoWhiteHC'] ?? 0.1486;
+$tarifTempoBlueHP = $_POST['tarifTempoBlueHP'] ?? 0.1609;
+$tarifTempoBlueHC = $_POST['tarifTempoBlueHC'] ?? 0.1296;
 $aboZenWE = $_POST['aboZenWE'] ?? 12.44;
-$tarifZenWEWeek = $_POST['tarifZenWEWeek'] ?? 0.2525;
-$tarifZenWEEnd = $_POST['tarifZenWEEnd'] ?? 0.1771;
+$tarifZenWEWeek = $_POST['tarifZenWEWeek'] ?? 0.2765;
+$tarifZenWEEnd = $_POST['tarifZenWEEnd'] ?? 0.2011;
 $aboZenWEHCHP = $_POST['aboZenWEHCHP'] ?? 13.03;
-$tarifZenWEHPWeek = $_POST['tarifZenWEHPWeek'] ?? 0.2683;
-$tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.1881;
-$tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.1881;
-$tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.1881;
+$tarifZenWEHPWeek = $_POST['tarifZenWEHPWeek'] ?? 0.2923;
+$tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.2121;
+$tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.2121;
+$tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.2121;
 $excludeDays = $_POST['excludeDays'] ?? '';
 $tempoHisto = [];
 $dateHistoMin = PHP_INT_MAX;
@@ -598,7 +598,7 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 					';
 				} else {
 					$comment .= '<footer class="blockquote-footer">
-											(1) - Tempo : il y a trop peu de données historiques pour l\'estimation de \'option Tempo
+											(1) - Tempo : il y a trop peu de données historiques pour l\'estimation de l\'option Tempo
 											</footer>
 					';
 				}
