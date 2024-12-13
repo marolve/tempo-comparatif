@@ -1,27 +1,32 @@
 <?php
 
 $tarifBase = $_POST['tarifBase'] ?? 0.2516;
-$aboBase = $_POST['aboBase'] ?? 12.60;
+$aboBase = $_POST['aboBase'] ?? 12.68;
 $horaireHC1 = $_POST['horaireHC1'] ?? '2200-0600';
 $horaireHC2 = $_POST['horaireHC2'] ?? '';
+
 $tarifHP = $_POST['tarifHP'] ?? 0.2700;
 $tarifHC = $_POST['tarifHC'] ?? 0.2068;
-$aboHCHP = $_POST['aboHCHP'] ?? 13.01;
-$aboTempo = $_POST['aboTempo'] ?? 12.96;
+$aboHCHP = $_POST['aboHCHP'] ?? 13.09;
+
+$aboTempo = $_POST['aboTempo'] ?? 13.03;
 $tarifTempoRedHP = $_POST['tarifTempoRedHP'] ?? 0.7562;
 $tarifTempoRedHC = $_POST['tarifTempoRedHC'] ?? 0.1568;
 $tarifTempoWhiteHP = $_POST['tarifTempoWhiteHP'] ?? 0.1894;
 $tarifTempoWhiteHC = $_POST['tarifTempoWhiteHC'] ?? 0.1486;
 $tarifTempoBlueHP = $_POST['tarifTempoBlueHP'] ?? 0.1609;
 $tarifTempoBlueHC = $_POST['tarifTempoBlueHC'] ?? 0.1296;
-$aboZenWE = $_POST['aboZenWE'] ?? 12.60;
-$tarifZenWEWeek = $_POST['tarifZenWEWeek'] ?? 0.2629;
-$tarifZenWEEnd = $_POST['tarifZenWEEnd'] ?? 0.1916;
-$aboZenWEHCHP = $_POST['aboZenWEHCHP'] ?? 13.19;
-$tarifZenWEHPWeek = $_POST['tarifZenWEHPWeek'] ?? 0.2788;
-$tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.2027;
-$tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.2027;
-$tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.2027;
+
+$aboZenWE = $_POST['aboZenWE'] ?? 12.68;
+$tarifZenWEWeek = $_POST['tarifZenWEWeek'] ?? 0.2652;
+$tarifZenWEEnd = $_POST['tarifZenWEEnd'] ?? 0.1932;
+
+$aboZenWEHCHP = $_POST['aboZenWEHCHP'] ?? 13.09;
+$tarifZenWEHPWeek = $_POST['tarifZenWEHPWeek'] ?? 0.2808;
+$tarifZenWEHCWeek = $_POST['tarifZenWEHCWeek'] ?? 0.2041;
+$tarifZenWEHPEnd = $_POST['tarifZenWEHPEnd'] ?? 0.2041;
+$tarifZenWEHCEnd = $_POST['tarifZenWEHCEnd'] ?? 0.2041;
+
 $excludeDays = $_POST['excludeDays'] ?? '';
 $tempoHisto = [];
 $dateHistoMin = PHP_INT_MAX;
