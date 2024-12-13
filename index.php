@@ -32,14 +32,12 @@ $tempoHisto = [];
 $dateHistoMin = PHP_INT_MAX;
 $dateHistoMax = 0;
 
-//$tempoHistoYear = 2022;
-//while($tempoHistoYear <= date('Y')) {
-////    echo 'https://particulier.edf.fr/services/rest/referentiel/historicTEMPOStore?dateBegin='.$tempoHistoYear.'&dateEnd='.($tempoHistoYear+1); exit;
-//    $json = file_get_contents('https://particulier.edf.fr/services/rest/referentiel/historicTEMPOStore?dateBegin='.$tempoHistoYear.'&dateEnd='.($tempoHistoYear+1));
-////    $json = json_decode(file_get_contents('https://particulier.edf.fr/services/rest/referentiel/historicTEMPOStore?dateBegin='.$tempoHistoYear.'&dateEnd='.($tempoHistoYear+1)), true);
-//    var_dump($json); exit;
-//    $tempoHistoYear++;
-//}
+// Historique Tempo : https://www.api-couleur-tempo.fr/api/joursTempo
+// codeJour 0 = pas encore défini, 1 = bleu, 2 = blanc, 3 = rouge
+define("CODEJOUR_NONE", 0);
+define("CODEJOUR_BLEU", 1);
+define("CODEJOUR_BLANC", 2);
+define("CODEJOUR_ROUGE", 3);
 
 function isHC($periodsHC, $currentHour) {
 	foreach ($periodsHC as $periodHC) {
@@ -74,16 +72,17 @@ function loadTempoHisto($fileName) {
 	global $dateHistoMin, $dateHistoMax, $tempoHisto;
 	$tempoHistoJson = json_decode(file_get_contents($fileName), true);
 	if (is_array($tempoHistoJson)) {
-		foreach ($tempoHistoJson['dates'] as $item) {
-			$date = strtotime($item['date']);
+		foreach ($tempoHistoJson as $item) {
+			$date = strtotime($item['dateJour']);
 			$dateHistoMin = min($date, $dateHistoMin);
 			$dateHistoMax = max($date, $dateHistoMax);
-			$tempoHisto[$item['date']] = $item['couleur'];
+			// codeJour 0 = pas encore défini, 1 = bleu, 2 = blanc, 3 = rouge
+			$tempoHisto[$item['dateJour']] = $item['codeJour'];
 		}
 	}
 }
 
-loadTempoHisto('tempo.json');
+loadTempoHisto('tempolist.json');
 
 if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['horaireHC1']) && isset($_FILES['conso_file']) && file_exists($_FILES['conso_file']['tmp_name'])) {
     $consos = [];
@@ -205,16 +204,16 @@ if (isset($_POST['tarifBase']) && isset($_POST['tarifHP']) && isset($_POST['hora
 
         // Tempo
         $tempoDate = (int)$currentDate->format('Hi') > 600 ? (clone $currentDate) : (clone $currentDate)->sub(new DateInterval('P1D'));
-        $couleurTempo = $tempoHisto[$tempoDate->format('Y-n-j')] ?? 'TEMPO_BLEU';
-				if ($couleurTempo == 'TEMPO_BLEU') {
+        $couleurTempo = $tempoHisto[$tempoDate->format('Y-m-d')] ?? CODEJOUR_BLEU;
+				if ($couleurTempo == CODEJOUR_BLEU) {
 					$couleurTempo = 'bleu';
 					$tarifTempo = $isTempoHC ? $tarifTempoBlueHC : $tarifTempoBlueHP;
 				}
-				if ($couleurTempo == 'TEMPO_BLANC') {
+				if ($couleurTempo == CODEJOUR_BLANC) {
 					$couleurTempo = 'blanc';
 					$tarifTempo = $isTempoHC ? $tarifTempoWhiteHC : $tarifTempoWhiteHP;
 				}
-				if ($couleurTempo == 'TEMPO_ROUGE') {
+				if ($couleurTempo == CODEJOUR_ROUGE) {
 					$couleurTempo = 'rouge';
 					$tarifTempo = $isTempoHC ? $tarifTempoRedHC : $tarifTempoRedHP;
 				}
